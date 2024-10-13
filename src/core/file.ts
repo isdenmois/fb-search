@@ -6,7 +6,7 @@ export async function getFile(file: string, path: string) {
 
   return entry
     ? {
-        stream: zip.stream(entry),
+        stream: await zip.stream(entry),
         size: entry.size,
       }
     : null;
