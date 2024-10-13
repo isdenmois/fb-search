@@ -76,7 +76,7 @@ const app = new Elysia({
           set.headers["content-length"] = String(size);
         }
 
-        return new Response(stream!).blob();
+        return new Response(stream!).bytes();
       }
 
       set.status = 404;
