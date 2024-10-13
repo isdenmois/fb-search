@@ -57,7 +57,8 @@ const app = new Elysia({
       const file = db.select().from(books).where(eq(books.id, id)).get();
 
       if (file?.file && file.path) {
-        const stream = await getFile(file.file, file.path);
+        const { stream, size } = (await getFile(file.file, file.path)) ?? {};
+
         const filename = [
           file.authors ? slugify(file.authors) : null,
           file.title ? slugify(file.title) : null,
@@ -70,6 +71,10 @@ const app = new Elysia({
           "content-disposition"
         ] = `attachment; filename="${filename}"`;
         set.headers["content-type"] = "text/fb2+xml";
+
+        if (size) {
+          set.headers["content-length"] = String(size);
+        }
 
         return stream;
       }
