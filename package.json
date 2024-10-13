@@ -1,0 +1,28 @@
+{
+  "name": "fb-search",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --target bun --outdir ./dist",
+    "start": "NODE_ENV=production bun dist/index.js",
+    "test": "bun test",
+    "schema": "bunx drizzle-kit generate --dialect sqlite --schema ./src/core/db/schema.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.11",
+    "drizzle-kit": "^0.25.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@elysiajs/static": "^1.1.1",
+    "@elysiajs/swagger": "^1.1.5",
+    "csv-parse": "^5.5.6",
+    "drizzle-orm": "^0.34.1",
+    "elysia": "^1.1.22",
+    "node-stream-zip": "^1.15.0",
+    "transliteration": "^2.3.5"
+  }
+}
