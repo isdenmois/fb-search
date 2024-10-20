@@ -9,6 +9,7 @@ button:focus {
 
 body {
   background-color: var(--background);
+  font-family: sans-serif;
 }
 
 #app {
@@ -23,6 +24,10 @@ body {
 h1 {
   font-size: 24px;
   color: var(--profileText);
+}
+
+a {
+  text-decoration: none;
 }
 
 .input {
