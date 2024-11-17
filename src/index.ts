@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { searchBooks, searchBooksRu, findAllByFile, findFileById } from './core/db'
 import { getFile } from './core/file'
+import { parser } from './core/inpx-parser'
 import { slugify } from 'transliteration'
 import { staticPlugin } from '@elysiajs/static'
 
@@ -64,4 +65,10 @@ new Elysia({
     },
     { params: t.Object({ id: t.Number() }) },
   )
+  .post('/api/parser', () => {
+    parser.parse()
+
+    return parser
+  })
+  .get('/api/parser', () => parser)
   .listen(port)

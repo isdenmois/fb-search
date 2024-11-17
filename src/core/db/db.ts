@@ -1,3 +1,3 @@
-import { drizzle } from 'drizzle-orm/pglite'
+import { drizzle } from 'drizzle-orm/node-postgres'
 
-export const db = drizzle('data/pg')
+export const db = drizzle(process.env.DATABASE_URL ?? '')
