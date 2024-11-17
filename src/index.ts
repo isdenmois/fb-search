@@ -6,6 +6,11 @@ import { parser } from './core/inpx-parser'
 import { slugify } from 'transliteration'
 import { staticPlugin } from '@elysiajs/static'
 
+import { migrate } from 'drizzle-orm/node-postgres/migrator'
+import { db } from './core/db/db'
+
+await migrate(db, { migrationsFolder: './drizzle' })
+
 const port = +(process.env.PORT || 3000)
 
 function containsCyrillic(str: string) {
