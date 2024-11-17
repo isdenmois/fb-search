@@ -57,6 +57,8 @@ export function findAllByFile(file: string) {
     .execute()
 }
 
-export function findFileById(id: number) {
-  return db.select().from(books).where(eq(books.id, id)).get()
+export async function findFileById(id: number) {
+  const result = await db.select().from(books).where(eq(books.id, id)).execute()
+
+  return result[0]
 }

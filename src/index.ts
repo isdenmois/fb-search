@@ -42,7 +42,7 @@ new Elysia({
   .get(
     '/dl/:id',
     async ({ params: { id }, set }) => {
-      const file = findFileById(id)
+      const file = await findFileById(id)
 
       if (file?.file && file.path) {
         const { stream, size } = (await getFile(file.file, file.path)) ?? {}
