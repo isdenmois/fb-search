@@ -24,4 +24,5 @@ COPY package.json .
 COPY tsconfig.json .
 COPY --from=builder /app/dist dist
 COPY --from=builder /app/public public
+COPY --from=builder /app/drizzle drizzle
 CMD ["bun", "start"]
