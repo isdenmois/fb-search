@@ -11,7 +11,6 @@ WORKDIR /app
 COPY --from=modules /app/node_modules node_modules/
 COPY . .
 RUN bun run build
-RUN bun run schema:migrate
 RUN bun run web:build
 
 # run the app
