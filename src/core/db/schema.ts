@@ -1,25 +1,34 @@
-import { SQL, sql } from "drizzle-orm";
-import {
-  sqliteTable,
-  sqliteView,
-  text,
-  index,
-  integer,
-  type AnySQLiteColumn,
-} from "drizzle-orm/sqlite-core";
+import { sql } from 'drizzle-orm'
+import { pgTable, integer, text, index } from 'drizzle-orm/pg-core'
 
-export const books = sqliteTable(
-  "books",
+export interface Book {
+  title: string
+  search: string
+  authors?: string
+  series?: string
+  serno?: string
+  file: string
+  path: string
+  lang?: string
+}
+
+export const books = pgTable(
+  'books',
   {
-    id: integer().primaryKey({ autoIncrement: true }),
+    id: integer().primaryKey().generatedByDefaultAsIdentity(),
     title: text().notNull(),
     search: text().notNull(),
     authors: text(),
+    series: text(),
+    serno: text(),
     file: text(),
     path: text(),
     lang: text(),
   },
   (table) => ({
-    searchIdx: index("search_idx").on(table.search),
-  })
-);
+    searchRuIdx: index('search_ru_idx').using('gin', sql`to_tsvector('russian', ${table.search})`),
+    searchSimpleIdx: index('search_simple_idx').using('gin', sql`to_tsvector('simple', ${table.search})`),
+  }),
+)
+
+// export const search = sql`to_tsvector(${books.title} || ${books.authors})`

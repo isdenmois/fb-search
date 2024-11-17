@@ -5,8 +5,9 @@
   export let book: Book
 
   const ext = 'fb2'
+  const subtitle = [book.lang, book.series, +book.serno].filter(Boolean).join(' ')
 </script>
 
-<Item suptitle={book.authors} title={book.title} subtitle={book.lang}>
+<Item suptitle={book.authors} title={book.title} {subtitle}>
   <FileIcon slot="icon" text={ext} />
 </Item>

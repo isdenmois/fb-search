@@ -1,5 +1,3 @@
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import { Database } from "bun:sqlite";
+import { drizzle } from 'drizzle-orm/pglite'
 
-const sqlite = new Database("data/sqlite.db");
-export const db = drizzle(sqlite);
+export const db = drizzle('data/pg')

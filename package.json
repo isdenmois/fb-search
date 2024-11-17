@@ -9,7 +9,10 @@
     "build": "bun build src/index.ts --target bun --outdir ./dist",
     "start": "NODE_ENV=production bun dist/index.js",
     "test": "bun test",
-    "schema": "bunx drizzle-kit generate --dialect sqlite --schema ./src/core/db/schema.ts"
+    "parse": "bun run ./scripts/parse-inpx",
+    "schema": "bun run schema:generate && bun run schema:migrate",
+    "schema:generate": "drizzle-kit generate --dialect postgresql --schema ./src/core/db/schema.ts",
+    "schema:migrate": "bun run ./scripts/migrate.ts"
   },
   "devDependencies": {
     "@types/bun": "1.1.11",
@@ -37,6 +40,7 @@
     "typescript": "5.0.0"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.2.13",
     "@elysiajs/static": "1.1.1",
     "@elysiajs/swagger": "1.1.5",
     "csv-parse": "5.5.6",
