@@ -5,7 +5,8 @@
   export let book: Book
 
   const ext = 'fb2'
-  const subtitle = [book.lang, book.series, +book.serno].filter(Boolean).join(' ')
+  const size = Math.round(book.size / 1024 || 0).toLocaleString('ru') + 'Kb'
+  const subtitle = [size, book.series, +book.serno, book.lang].filter(Boolean).join(', ')
 </script>
 
 <Item suptitle={book.authors} title={book.title} {subtitle}>

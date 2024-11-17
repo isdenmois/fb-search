@@ -108,6 +108,7 @@ async function parseInp(zip: StreamZipAsync, entry: ZipEntry) {
       // genre,
       series,
       serno,
+      size: +size || 0,
       // librate,
       path,
       search: trunc([authors, title, series].filter(Boolean).join(' ').toLocaleLowerCase()),

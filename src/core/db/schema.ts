@@ -10,6 +10,7 @@ export interface Book {
   file: string
   path: string
   lang?: string
+  size: number
 }
 
 export const books = pgTable(
@@ -24,6 +25,7 @@ export const books = pgTable(
     file: text(),
     path: text(),
     lang: text(),
+    size: integer(),
   },
   (table) => ({
     searchRuIdx: index('search_ru_idx').using('gin', sql`to_tsvector('russian', ${table.search})`),
