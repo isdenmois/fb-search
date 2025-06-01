@@ -24,6 +24,7 @@ RUN bun run web:build
 FROM oven/bun:latest
 WORKDIR /app
 COPY --from=p7z /usr/bin/7z /usr/bin/7z
+COPY --from=p7z /usr/lib/p7zip /usr/lib/p7zip
 ARG PORT=3000
 ENV PORT ${PORT}
 ENV NODE_ENV production
