@@ -66,11 +66,11 @@ new Elysia({
         }
 
         if (result) {
-          if (result.size) {
-            set.headers['content-length'] = String(result.size)
+          if (result.length) {
+            set.headers['content-length'] = String(result.length)
           }
 
-          return new Response(result.stream).bytes()
+          return new Response(result).bytes()
         }
       }
 
@@ -86,15 +86,17 @@ new Elysia({
 
       if (file?.file && file.path) {
         const fileId = parse(file.path).name
-        const { stream, size } = (await getCover(file.file, fileId)) ?? {}
+        const stream = await getCover(file.file, fileId)
 
-        set.headers['content-type'] = 'image/jpeg'
+        if (stream) {
+          set.headers['content-type'] = 'image/jpeg'
 
-        if (size) {
-          set.headers['content-length'] = String(size)
+          if (stream.length) {
+            set.headers['content-length'] = String(stream.length)
+          }
+
+          return new Response(stream!).bytes()
         }
-
-        return new Response(stream!).bytes()
       }
 
       set.status = 404

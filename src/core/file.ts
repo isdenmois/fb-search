@@ -1,83 +1,52 @@
-import StreamZip from 'node-stream-zip'
-import { XMLParser, XMLBuilder } from 'fast-xml-parser'
+import fs from 'node:fs'
 import { basename } from 'path'
 
-const parser = new XMLParser({
-  ignoreAttributes: false,
-  allowBooleanAttributes: true,
-})
-const builder = new XMLBuilder({
-  ignoreAttributes: false,
-})
-
 export async function getFile(file: string, path: string) {
-  const zPath = `files/${file}`.replace(/\.zip$/, '.7z')
-  const proc = Bun.spawn(['7z', 'x', '-so', zPath, path])
+  const z7Path = `files/${file}`.replace(/\.zip$/, '.7z')
 
-  await proc.exited
+  if (!fs.existsSync(z7Path)) {
+    return extractFile(`files/${file}`, path)
+  }
 
-  if (proc.exitCode === 0) {
+  const stdout = await extractFile(z7Path, path)
+
+  if (stdout) {
     const id = path.replace('.fb2', '')
     const withCover = await hasCover(file, id)
     const images = await getImages(file, id)
 
-    console.log({ id, withCover, images })
+    const binaries = [
+      { id: 'cover', text: await getCoverBase64(file, id) },
+      ...(await Promise.all(images.map(async (img) => ({ id: basename(img), text: await getImageBase64(file, img) })))),
+    ]
 
     if (withCover || images.length) {
-      const text = await new Response(proc.stdout).text()
-      const jObj = parser.parse(text)
-      let binary: any[]
+      const text = await new Response(stdout).text()
+      const b = binaries.map((bin) => `<binary id="${bin.id}" content-type="image/jpeg">${bin.text}</binary>`).join('')
 
-      if ('binary' in jObj.FictionBook) {
-        if (!Array.isArray(jObj.FictionBook.binary)) {
-          jObj.FictionBook.binary = [jObj.FictionBook.binary]
-        }
-      } else {
-        jObj.FictionBook.binary = []
-      }
-      binary = jObj.FictionBook.binary
-
-      if (withCover) {
-        const cover = await getCoverBase64(file, id)
-
-        if (cover) {
-          binary.push({ '@_id': 'cover', '@_content-type': 'image/jpeg', '#text': cover })
-        }
-      }
-
-      for (const imgFile of images) {
-        const img = await getImageBase64(file, imgFile)
-
-        if (img) {
-          const imgId = basename(imgFile)
-
-          binary.push({ '@_id': imgId, '@_content-type': 'image/jpeg', '#text': img })
-        }
-      }
-
-      return builder.build(jObj)
+      return text.replace(/<\/\s*FictionBook>/i, (match) => `${b}${match}`)
     }
 
-    return {
-      stream: proc.stdout,
-      size: proc.stdout.length,
-    }
+    return stdout
+  }
+
+  return null
+}
+
+async function extractFile(file: string, include: string) {
+  const proc = Bun.spawn(['7z', 'x', '-so', file, include])
+
+  await proc.exited
+
+  if (proc.exitCode === 0) {
+    return proc.stdout
   }
 
   return null
 }
 
 export async function getCover(file: string, id: string) {
-  const zip = new StreamZip.async({ file: `files/covers/${file}` })
-
-  const entry = await zip.entry(id)
-
-  return entry
-    ? {
-        stream: await zip.stream(entry),
-        size: entry.size,
-      }
-    : null
+  return extractFile(`files/covers/${file}`, id)
 }
 
 function getCoverBase64(file: string, id: string) {
