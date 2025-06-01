@@ -22,6 +22,16 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        '/dl': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/cover': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
     root: 'web',

@@ -43,7 +43,9 @@ export async function parseInpx(inpxPath: string) {
     parser.currentFile++
 
     if (!entry.isDirectory && entry.name.endsWith('.inp')) {
-      parser.booksImported += await parseInp(zip, entry)
+      if (entry.name.includes('f.fb2-173909-177717')) {
+        parser.booksImported += await parseInp(zip, entry)
+      }
     }
   }
   zip.close()
@@ -86,6 +88,7 @@ async function parseInp(zip: StreamZipAsync, entry: ZipEntry) {
 
   // biome-ignore lint/complexity/noForEach: <explanation>
   await stream.pipe(createCsvParser()).forEach((data) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [author, genre, title, series, serno, filename, size, libid, del, ext, date, lang, librate, keywords] = data
     // console.log(data);
     const authors = author
@@ -94,10 +97,6 @@ async function parseInp(zip: StreamZipAsync, entry: ZipEntry) {
       .filter((s: string) => s)
       .join(',')
     const path = `${filename}.${ext}`
-
-    // if (title.toLowerCase().includes('пепел и сталь')) {
-    //   console.log(data)
-    // }
 
     books.push({
       authors,

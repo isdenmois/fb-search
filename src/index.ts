@@ -1,13 +1,14 @@
 import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { searchBooks, searchBooksRu, findAllByFile, findFileById } from './core/db'
-import { getFile } from './core/file'
+import { getCover, getFile } from './core/file'
 import { parser } from './core/inpx-parser'
 import { slugify } from 'transliteration'
 import { staticPlugin } from '@elysiajs/static'
 
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { db } from './core/db/db'
+import { parse } from 'node:path'
 
 await migrate(db, { migrationsFolder: './drizzle' })
 
@@ -45,7 +46,7 @@ new Elysia({
       const file = await findFileById(id)
 
       if (file?.file && file.path) {
-        const { stream, size } = (await getFile(file.file, file.path)) ?? {}
+        const result = await getFile(file.file, file.path)
 
         const filename = [
           file.authors ? slugify(file.authors) : null,
@@ -57,6 +58,37 @@ new Elysia({
 
         set.headers['content-disposition'] = `attachment; filename="${filename}"`
         set.headers['content-type'] = 'text/fb2+xml'
+
+        if (typeof result === 'string') {
+          set.headers['content-length'] = String(result.length)
+
+          return result
+        }
+
+        if (result) {
+          if (result.size) {
+            set.headers['content-length'] = String(result.size)
+          }
+
+          return new Response(result.stream).bytes()
+        }
+      }
+
+      set.status = 404
+      return { ok: false }
+    },
+    { params: t.Object({ id: t.Number() }) },
+  )
+  .get(
+    '/cover/:id',
+    async ({ params: { id }, set }) => {
+      const file = await findFileById(id)
+
+      if (file?.file && file.path) {
+        const fileId = parse(file.path).name
+        const { stream, size } = (await getCover(file.file, fileId)) ?? {}
+
+        set.headers['content-type'] = 'image/jpeg'
 
         if (size) {
           set.headers['content-length'] = String(size)
