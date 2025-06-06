@@ -38,11 +38,7 @@ async function extractFile(file: string, include: string) {
 
   await proc.exited
 
-  if (proc.exitCode === 0) {
-    return proc.stdout
-  }
-
-  return null
+  return proc.stdout
 }
 
 export async function getCover(file: string, id: string) {
@@ -55,6 +51,16 @@ function getCoverBase64(file: string, id: string) {
 
 function getImageBase64(file: string, path: string) {
   return getFileBase64(`files/images/${file}`, path)
+}
+
+export async function getText(file: string, include: string) {
+  const stdout = await extractFile(file, include)
+
+  if (stdout) {
+    return await new Response(stdout).text()
+  }
+
+  return ''
 }
 
 async function getFileBase64(file: string, include: string) {
@@ -72,23 +78,19 @@ async function getFileBase64(file: string, include: string) {
   return null
 }
 
-async function listFiles(file: string, include: string) {
+export async function listFiles(file: string, include: string) {
   const proc = Bun.spawn(['7z', 'l', '-ba', file, include])
 
   await proc.exited
 
-  if (proc.exitCode === 0) {
-    const text = await new Response(proc.stdout).text()
-    const files = text
-      .split('\n')
-      .filter(Boolean)
-      .map((file) => file.match(/(\S+)$/)?.['1'])
-      .filter(Boolean)
+  const text = await new Response(proc.stdout).text()
+  const files = text
+    .split('\n')
+    .filter(Boolean)
+    .map((file) => file.match(/(\S+)$/)?.['1'])
+    .filter(Boolean)
 
-    return files as string[]
-  }
-
-  return []
+  return files as string[]
 }
 
 async function hasCover(file: string, id: string) {

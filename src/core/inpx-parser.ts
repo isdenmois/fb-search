@@ -1,8 +1,9 @@
-import StreamZip, { type StreamZipAsync, type ZipEntry } from 'node-stream-zip'
+import { spawn } from 'node:child_process'
 import * as CSV from 'csv-parse'
 import { db, insertBooks } from './db'
 import { books, type Book } from './db/schema'
 import { sql } from 'drizzle-orm'
+import { listFiles } from './file'
 
 const MAX = 2048
 
@@ -31,24 +32,18 @@ export async function parseInpx(inpxPath: string) {
   parser.currentFile = 0
 
   console.log('Start parsing INPX file', inpxPath)
-  const zip = new StreamZip.async({ file: inpxPath })
-  const entriesCount = await zip.entriesCount
+  const files = await listFiles(inpxPath, '*.inp')
+  console.log(files)
 
-  console.log('Entries Count', entriesCount)
+  const filesCount = files.length
 
-  const entries = Object.values(await zip.entries())
-  parser.totalFiles = entries.length
+  console.log('Files count', filesCount)
 
-  for (const entry of entries) {
+  for (const file of files) {
     parser.currentFile++
 
-    if (!entry.isDirectory && entry.name.endsWith('.inp')) {
-      if (entry.name.includes('f.fb2-173909-177717')) {
-        parser.booksImported += await parseInp(zip, entry)
-      }
-    }
+    parser.booksImported += await parseInp(inpxPath, file)
   }
-  zip.close()
 }
 
 function createCsvParser() {
@@ -79,15 +74,17 @@ function trunc(s: string) {
   return s.length > MAX ? s.slice(0, MAX) : s
 }
 
-async function parseInp(zip: StreamZipAsync, entry: ZipEntry) {
-  console.log('Parse INP file', entry.name)
-  const stream = await zip.stream(entry)
+async function parseInp(inpx: string, entry: string) {
+  console.log('Parse INP file', entry)
+  const parser = createCsvParser()
+  const proc = spawn('7z', ['x', '-so', inpx, entry])
+
   let count = 0
   const books: Book[] = []
-  const file = entry.name.replace('.inp', '.zip')
+  const file = entry.replace('.inp', '.zip')
 
   // biome-ignore lint/complexity/noForEach: <explanation>
-  await stream.pipe(createCsvParser()).forEach((data) => {
+  await proc.stdout.pipe(parser).forEach((data) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [author, genre, title, series, serno, filename, size, libid, del, ext, date, lang, librate, keywords] = data
     // console.log(data);
