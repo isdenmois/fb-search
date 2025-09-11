@@ -12,6 +12,24 @@ services:
       - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+      - pgnetwork
+  # webapp:
+  #   build: .
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - .:/app
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - pgnetwork
 volumes:
   db:
     driver: local
+
+networks:
+  pgnetwork:
+    driver: bridge

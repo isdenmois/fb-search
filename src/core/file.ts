@@ -1,3 +1,4 @@
+import type { Subprocess } from 'bun'
 import fs from 'node:fs'
 import { basename } from 'path'
 
@@ -33,24 +34,46 @@ export async function getFile(file: string, path: string) {
   return null
 }
 
+function spawnExtract(file: string, include: string) {
+  return Bun.spawn(['7z', 'x', '-so', file, include])
+}
+
+async function procToStream<T>(proc: Subprocess<ReadableStream<T>>) {
+  await proc.exited
+
+  return proc.stdout as ReadableStream<T>
+}
+
 async function extractFile(file: string, include: string) {
-  const proc = Bun.spawn(['7z', 'x', '-so', file, include])
+  const proc = spawnExtract(file, include)
 
   await proc.exited
 
   return proc.stdout
 }
 
-export async function getCover(file: string, id: string) {
-  return extractFile(`files/covers/${file}`, id)
+function extractJpegXl(file: string, include: string) {
+  const proc = Bun.spawn(['djxl', '--quiet', '--output_format', 'jpeg', '-', '-'], {
+    stdin: spawnExtract(file, include).stdout,
+  })
+
+  return procToStream(proc)
 }
 
-function getCoverBase64(file: string, id: string) {
-  return getFileBase64(`files/covers/${file}`, id)
+export function getCover(file: string, id: string) {
+  return extractJpegXl(`files/covers/${file}`, id)
 }
 
-function getImageBase64(file: string, path: string) {
-  return getFileBase64(`files/images/${file}`, path)
+function getImage(file: string, path: string) {
+  return extractJpegXl(`files/images/${file}`, path)
+}
+
+async function getCoverBase64(file: string, id: string) {
+  return getBase64(await getCover(file, id))
+}
+
+async function getImageBase64(file: string, path: string) {
+  return getBase64(await getImage(file, path))
 }
 
 export async function getText(file: string, include: string) {
@@ -63,19 +86,11 @@ export async function getText(file: string, include: string) {
   return ''
 }
 
-async function getFileBase64(file: string, include: string) {
-  const proc = Bun.spawn(['7z', 'x', '-so', file, include])
+async function getBase64(from: ReadableStream) {
+  const arrBuf = await Bun.readableStreamToArrayBuffer(from)
+  const buf = Buffer.from(arrBuf)
 
-  await proc.exited
-
-  if (proc.exitCode === 0) {
-    const arrBuf = await Bun.readableStreamToArrayBuffer(proc.stdout)
-    const buf = Buffer.from(arrBuf)
-
-    return buf.toString('base64')
-  }
-
-  return null
+  return buf.toString('base64')
 }
 
 export async function listFiles(file: string, include: string) {

@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
-import { searchBooks, searchBooksRu, findAllByFile, findFileById } from './core/db'
+import { searchBooks, searchBooksRu, findAllByFile, findFileById, findByFbId } from './core/db'
 import { getCover, getFile } from './core/file'
 import { parser } from './core/inpx-parser'
 import { slugify } from 'transliteration'
@@ -40,6 +40,7 @@ new Elysia({
     },
   )
   .get('/api/by-file/:file', ({ params: { file } }) => findAllByFile(file))
+  .get('/api/by-fb-id/:id', ({ params: { id } }) => findByFbId(id))
   .get(
     '/dl/:id',
     async ({ params: { id }, set }) => {

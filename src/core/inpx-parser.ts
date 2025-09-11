@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { basename } from 'node:path'
 import * as CSV from 'csv-parse'
 import { db, insertBooks } from './db'
 import { books, type Book } from './db/schema'
@@ -21,7 +23,7 @@ export const parser = {
 
     await db.execute(sql`TRUNCATE TABLE ${books} RESTART IDENTITY`)
 
-    await parseInpx('./files/flibusta_fb2_local.inpx')
+    await parseInpx('./files/fb2.Flibusta.Net.7z.inpx')
 
     parser.took = (Date.now() - start) / 1000
   },
@@ -33,7 +35,6 @@ export async function parseInpx(inpxPath: string) {
 
   console.log('Start parsing INPX file', inpxPath)
   const files = await listFiles(inpxPath, '*.inp')
-  console.log(files)
 
   const filesCount = files.length
 
@@ -75,13 +76,20 @@ function trunc(s: string) {
 }
 
 async function parseInp(inpx: string, entry: string) {
+  const base = entry.substring(0, entry.lastIndexOf('.'))
+  const zip = `./files/${base}.7z`
+
+  if (!existsSync(zip)) {
+    return 0
+  }
+
   console.log('Parse INP file', entry)
   const parser = createCsvParser()
   const proc = spawn('7z', ['x', '-so', inpx, entry])
 
   let count = 0
   const books: Book[] = []
-  const file = entry.replace('.inp', '.zip')
+  const file = `${base}.zip`
 
   // biome-ignore lint/complexity/noForEach: <explanation>
   await proc.stdout.pipe(parser).forEach((data) => {

@@ -1,7 +1,7 @@
-import { like, eq, sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 
 import { db } from './db'
-import { books, search, type Book } from './schema'
+import { books, type Book } from './schema'
 
 const limit = 1024
 
@@ -23,7 +23,6 @@ export function searchBooks(query: string) {
     db
       .select()
       .from(books)
-      // .where(like(books.search, `%${query.replaceAll('*', '%').toLowerCase()}%`))
       .where(sql`to_tsvector('simple', ${books.search}) @@ websearch_to_tsquery('simple', ${query})`)
       .limit(100)
       // .orderBy(sql`websearch_to_tsquery(${query})`)
@@ -36,7 +35,6 @@ export function searchBooksRu(query: string) {
     db
       .select()
       .from(books)
-      // .where(like(books.search, `%${query.replaceAll('*', '%').toLowerCase()}%`))
       .where(sql`to_tsvector('russian', ${books.search}) @@ websearch_to_tsquery('russian', ${query})`)
       .limit(100)
       // .orderBy(sql`websearch_to_tsquery(${query})`)
@@ -51,9 +49,18 @@ export function findAllByFile(file: string) {
       title: books.title,
       authors: books.authors,
       lang: books.lang,
+      path: books.path,
     })
     .from(books)
     .where(eq(books.file, file))
+    .execute()
+}
+
+export function findByFbId(id: string) {
+  return db
+    .select()
+    .from(books)
+    .where(eq(books.path, `${id}.fb2`))
     .execute()
 }
 

@@ -1,19 +1,21 @@
-# build 7z
-FROM debian:stable-slim AS p7z
+# build 7z, jxl
+FROM debian:13-slim AS libs
 
 RUN apt-get update && \
-    apt-get install -y p7zip-full && \
+    apt-get install -y p7zip-full libjxl-tools && \
     rm -rf /var/lib/apt/lists/*
 
+COPY --from=oven/bun:slim /usr/local/bin/bun /usr/local/bin
+
 # install node_modules
-FROM oven/bun:latest AS modules
+FROM oven/bun:slim AS modules
 WORKDIR /app
 COPY package.json .
 COPY bun.lockb .
 RUN bun install
 
 # build the files
-FROM oven/bun:latest AS builder
+FROM oven/bun:slim AS builder
 WORKDIR /app
 COPY --from=modules /app/node_modules node_modules/
 COPY . .
@@ -21,10 +23,9 @@ RUN bun run build
 RUN bun run web:build
 
 # run the app
-FROM oven/bun:latest
+FROM libs
 WORKDIR /app
-COPY --from=p7z /usr/bin/7z /usr/bin/7z
-COPY --from=p7z /usr/lib/p7zip /usr/lib/p7zip
+
 ARG PORT=3000
 ENV PORT ${PORT}
 ENV NODE_ENV production
