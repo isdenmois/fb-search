@@ -11,7 +11,7 @@ COPY --from=oven/bun:slim /usr/local/bin/bun /usr/local/bin
 FROM oven/bun:slim AS modules
 WORKDIR /app
 COPY package.json .
-COPY bun.lockb .
+COPY bun.lock .
 RUN bun install
 
 # build the files
