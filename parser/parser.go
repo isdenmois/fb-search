@@ -20,8 +20,9 @@ type ParserProgress struct {
 	time  uint
 }
 
-func parseInp(f *zip.File, a string, pool *pgxpool.Pool) (uint, error) {
-	if !isFileExist("./files/" + a) {
+func parseInp(f *zip.File, pool *pgxpool.Pool) (uint, error) {
+	sZip := strings.Replace(f.Name, ".inp", ".7z", 1)
+	if !isFileExist("./files/" + sZip) {
 		return 0, nil
 	}
 
@@ -31,7 +32,7 @@ func parseInp(f *zip.File, a string, pool *pgxpool.Pool) (uint, error) {
 	}
 	defer file.Close()
 
-	zipFile := strings.Replace(f.Name, ".inp", "", 1)
+	zipFile := strings.Replace(f.Name, ".inp", ".zip", 1)
 	tr := transform.NewReader(file, quoteStripper{})
 
 	source := NewCsvCopyFromSource(tr, zipFile)
@@ -58,10 +59,9 @@ func parseInpx(archive string, pool *pgxpool.Pool, progress *ParserProgress) err
 
 	for _, f := range r.File {
 		if strings.HasSuffix(f.Name, ".inp") {
-			a := strings.Replace(f.Name, ".inp", ".7z", 1)
 
 			wg.Go(func() {
-				parsed, _ := parseInp(f, a, pool)
+				parsed, _ := parseInp(f, pool)
 
 				atomic.AddUint64(&progress.books, uint64(parsed))
 				atomic.AddUint64(&progress.files, 1)

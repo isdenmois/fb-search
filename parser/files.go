@@ -9,9 +9,7 @@ import (
 )
 
 func getCover(file string, path string) (image.Image, error) {
-
-	return getImage("files/covers/"+file+".zip", fileNameWithoutExtension(path))
-
+	return getImage("files/covers/"+file, fileNameWithoutExtension(path))
 }
 
 func getImage(archive string, path string) (image.Image, error) {

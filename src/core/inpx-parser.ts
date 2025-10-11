@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { basename } from 'node:path'
 import * as CSV from 'csv-parse'
 import { db, insertBooks } from './db'
 import { books, type Book } from './db/schema'
