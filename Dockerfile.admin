@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 # Stage 2: Create the final, minimal image
 FROM alpine
 
-WORKDIR /root
+WORKDIR /app
 
 COPY --from=builder /app/main .
 
