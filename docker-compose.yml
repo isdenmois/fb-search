@@ -14,18 +14,33 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - pgnetwork
-  # webapp:
-  #   build: .
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - .:/app
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb
-  #   depends_on:
-  #     - db
-  #   networks:
-  #     - pgnetwork
+  webapp:
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb?sslmode=disable
+    depends_on:
+      - db
+    networks:
+      - pgnetwork
+  adminapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    ports:
+      - '8080:8080'
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb?sslmode=disable
+    depends_on:
+      - db
+      - webapp
+    networks:
+      - pgnetwork
 volumes:
   db:
     driver: local
