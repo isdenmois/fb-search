@@ -6,7 +6,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # install node_modules
-FROM oven/bun:1.2.23-alpine AS modules
+FROM oven/bun:1.2.23-slim AS modules
 WORKDIR /app
 COPY package.json .
 COPY bun.lock .
@@ -15,7 +15,7 @@ COPY bun.lock .
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 # build the files
-FROM oven/bun:1.2.23-alpine AS builder
+FROM oven/bun:1.2.23-slim AS builder
 WORKDIR /app
 COPY --from=modules /app/node_modules node_modules/
 COPY . .
