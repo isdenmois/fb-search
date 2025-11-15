@@ -85,7 +85,7 @@ func (self BookController) downloadFile(c *gin.Context) {
 	filename := filterASCII(*file.Authors) + "." + filterASCII(file.Title)
 
 	c.Header("Content-Disposition", "attachment; filename=\""+filename+".fb2\"")
-	c.Header("Content-Size", strconv.Itoa(len(data)))
+	c.Header("Content-Length", strconv.Itoa(len(data)))
 	c.Data(http.StatusOK, "text/fb2+xml", data)
 }
 
