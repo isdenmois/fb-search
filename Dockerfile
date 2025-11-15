@@ -29,5 +29,5 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM myrun
 WORKDIR /app
 COPY --from=go-builder /app/main .
-COPY --from=js-builder /app/public .
+COPY --from=js-builder /app/public public
 CMD ["./main"]
