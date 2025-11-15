@@ -76,23 +76,16 @@ func (self BookController) downloadFile(c *gin.Context) {
 	}
 	defer fb2.Close()
 
-	stat, err := fb2.Stat()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "can't open fb2"})
-		return
-	}
 	data, err := io.ReadAll(fb2)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "can't read fb2"})
 		return
 	}
 
-	// set.headers['content-disposition'] = `attachment; filename="${filename}"`
-	// set.headers['content-type'] = 'text/fb2+xml'
 	filename := filterASCII(*file.Authors) + "." + filterASCII(file.Title)
 
-	c.Header("content-disposition", "attachment; filename=\""+filename+".fb2\"")
-	c.Header("Content-Size", strconv.FormatInt(stat.Size(), 10))
+	c.Header("Content-Disposition", "attachment; filename=\""+filename+".fb2\"")
+	c.Header("Content-Size", strconv.Itoa(len(data)))
 	c.Data(http.StatusOK, "text/fb2+xml", data)
 }
 
