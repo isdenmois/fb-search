@@ -1,9 +1,11 @@
-package main
+package shared
 
 import (
 	"encoding/csv"
 	"io"
 	"strings"
+
+	"fb-search/shared/utils"
 )
 
 type CsvCopyFromSource struct {
@@ -34,11 +36,11 @@ func (c *CsvCopyFromSource) Next() bool {
 		// const [author, genre, title, series, serno, filename, size, libid, del, ext, date, lang, librate, keywords] = data
 		authorArray := strings.Split(record[0], ":")
 		var authorsA []string
-		title := truncString(record[2])
+		title := utils.TruncString(record[2])
 		series := record[3]
 		serno := record[4]
 		filename := record[5]
-		size := getSize(record[6])
+		size := utils.GetSize(record[6])
 		ext := record[9]
 		lang := record[11]
 
@@ -57,7 +59,7 @@ func (c *CsvCopyFromSource) Next() bool {
 
 		authors := strings.Join(authorsA, ", ")
 		search := strings.Join(searchA, " ")
-		search = truncString(strings.TrimSpace(search))
+		search = utils.TruncString(strings.TrimSpace(search))
 		search = strings.ToLower(search)
 
 		c.currentRow = []interface{}{

@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"unicode"
 )
 
-func isFileExist(path string) bool {
+func IsFileExist(path string) bool {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		return false
 	} else if err != nil {
@@ -19,7 +19,7 @@ func isFileExist(path string) bool {
 	}
 }
 
-func truncString(s string) string {
+func TruncString(s string) string {
 	if len(s) > 2048 {
 		ts := (s)[:2048]
 		return strings.ToValidUTF8(ts, "")
@@ -28,7 +28,7 @@ func truncString(s string) string {
 	return strings.ToValidUTF8(s, "")
 }
 
-func getSize(s string) int {
+func GetSize(s string) int {
 	if i, err := strconv.Atoi(s); err == nil {
 		return i
 	}
@@ -45,6 +45,6 @@ func ContainsCyrillic(s string) bool {
 	return false
 }
 
-func fileNameWithoutExtension(fileName string) string {
+func FileNameWithoutExtension(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }

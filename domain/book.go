@@ -1,4 +1,4 @@
-package main
+package domain
 
 type Book struct {
 	Id      string  `json:"id"`

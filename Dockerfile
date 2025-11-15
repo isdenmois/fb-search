@@ -1,37 +1,33 @@
-# build 7z, jxl
-FROM debian:13-slim AS libs
-
-RUN apt-get update && \
-    apt-get install -y p7zip-full libjxl-tools && \
-    rm -rf /var/lib/apt/lists/*
+FROM oven/bun:1.3.1-alpine as myjs
+FROM golang:1.25.4-trixie AS mygo
+FROM debian:trixie as myrun
 
 # install node_modules
-FROM oven/bun:1.2.23-slim AS modules
+FROM myjs AS js-builder
 WORKDIR /app
 COPY package.json .
 COPY bun.lock .
-
-# Mount Bun's cache directory
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
-
-# build the files
-FROM oven/bun:1.2.23-slim AS builder
-WORKDIR /app
-COPY --from=modules /app/node_modules node_modules/
 COPY . .
-RUN bun run build
 RUN bun run web:build
 
-# run the app
-FROM libs
+# build go app
+FROM mygo AS go-builder
 WORKDIR /app
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
 
-ARG PORT=3000
-ENV PORT ${PORT}
-ENV NODE_ENV production
-EXPOSE $PORT
-COPY --from=builder /usr/local/bin/bun /usr/bin
-COPY --from=builder /app/drizzle drizzle
-COPY --from=builder /app/dist dist
-COPY --from=builder /app/public public
-CMD ["/usr/bin/bun", "dist/index.js"]
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go build -ldflags="-s -w" -o main .
+
+FROM myrun
+WORKDIR /app
+COPY --from=go-builder /app/main .
+COPY --from=js-builder /app/public .
+CMD ["./main"]

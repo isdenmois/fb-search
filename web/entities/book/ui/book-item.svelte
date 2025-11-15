@@ -10,5 +10,5 @@
 </script>
 
 <Item suptitle={book.authors} title={book.title} {subtitle}>
-  <FileIcon slot="icon" text={ext} img={`/cover/${book.id}`} />
+  <FileIcon slot="icon" text={ext} />
 </Item>
