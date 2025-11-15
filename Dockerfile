@@ -1,6 +1,6 @@
 FROM oven/bun:1.3.1-alpine as myjs
-FROM golang:1.25.4-trixie AS mygo
-FROM debian:trixie as myrun
+FROM golang:1.25.4-alpine AS mygo
+FROM alpine as myrun
 
 # install node_modules
 FROM myjs AS js-builder
