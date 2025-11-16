@@ -53,6 +53,7 @@ func (self SearchRepository) Search(q string) ([]domain.Book, error) {
 	searchParameters := &api.SearchCollectionParams{
 		Q:       pointer.String(q),
 		QueryBy: pointer.String("idx"),
+		Limit:   pointer.Int(100),
 	}
 
 	res, err := self.ts.Collection("books").Documents().Search(context.Background(), searchParameters)
