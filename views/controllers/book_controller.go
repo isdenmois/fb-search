@@ -13,7 +13,8 @@ import (
 )
 
 type BookController struct {
-	booksRepository *repositories.BooksRepository
+	booksRepository  *repositories.BooksRepository
+	searchRepository *repositories.SearchRepository
 }
 
 func (self BookController) search(c *gin.Context) {
@@ -24,7 +25,26 @@ func (self BookController) search(c *gin.Context) {
 		return
 	}
 
-	books, err := self.booksRepository.SearchBooks(c.Query("q"))
+	books, err := self.booksRepository.SearchBooks(strings.ToLower(q))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, books)
+
+}
+
+func (self BookController) search2(c *gin.Context) {
+	q := c.Query("q")
+
+	if len(q) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Q should be at least 2 symbols"})
+		return
+	}
+
+	books, err := self.searchRepository.Search(strings.ToLower(q))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -91,11 +111,12 @@ func (self BookController) downloadFile(c *gin.Context) {
 
 func (self BookController) Bind(r *gin.Engine) error {
 	r.GET("/api/search", self.search)
+	r.GET("/api/v2/search", self.search2)
 	r.GET("/dl/:id", self.downloadFile)
 
 	return nil
 }
 
-func NewBookController(booksRepository *repositories.BooksRepository) *BookController {
-	return &BookController{booksRepository: booksRepository}
+func NewBookController(booksRepository *repositories.BooksRepository, searchRepository *repositories.SearchRepository) *BookController {
+	return &BookController{booksRepository: booksRepository, searchRepository: searchRepository}
 }

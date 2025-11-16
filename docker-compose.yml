@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: postgres
-    restart: always
+    restart: on-failure
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -14,6 +14,14 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - pgnetwork
+  typesense:
+    image: typesense/typesense:29.0
+    restart: on-failure
+    ports:
+      - '8108:8108'
+    volumes:
+      - ./data:/data
+    command: '--data-dir /data --api-key=xyz --enable-cors'
   # webapp:
   #   build: .
   #   ports:
