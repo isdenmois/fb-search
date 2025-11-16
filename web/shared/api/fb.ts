@@ -10,5 +10,4 @@ export interface Book {
   serno?: string
 }
 
-export const search = (query: string) =>
-  http.url('/v2/search').query({ q: query.trim() }).get().json() as Promise<Book[]>
+export const search = (query: string) => http.url('/search').query({ q: query.trim() }).get().json() as Promise<Book[]>
