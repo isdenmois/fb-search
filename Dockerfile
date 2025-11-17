@@ -33,4 +33,5 @@ FROM myrun
 WORKDIR /app
 COPY --from=go-builder /app/main .
 COPY --from=js-builder /app/public public
+COPY migrations migrations 
 CMD ["./main"]
