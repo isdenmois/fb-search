@@ -5,14 +5,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "bun",
-      "internalConsoleOptions": "neverOpen",
+      "name": "Launch main.go",
+      "type": "go",
       "request": "launch",
-      "name": "Debug File",
-      "program": "src/index.ts",
+      "mode": "debug",
       "cwd": "${workspaceFolder}",
-      "stopOnEntry": false,
-      "watchMode": false
+      "program": "main.go"
     }
   ]
 }

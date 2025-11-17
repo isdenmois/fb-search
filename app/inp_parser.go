@@ -16,8 +16,7 @@ import (
 )
 
 type InpParserCase struct {
-	booksRepository  *repositories.BooksRepository
-	searchRepository *repositories.SearchRepository
+	booksRepository *repositories.BooksRepository
 }
 
 func (self *InpParserCase) parseInp(f *zip.File) (uint, error) {
@@ -35,7 +34,7 @@ func (self *InpParserCase) parseInp(f *zip.File) (uint, error) {
 	tr := transform.NewReader(file, shared.QuoteStripper{})
 
 	source := shared.NewCsvCopyFromSource(tr, zipFileName)
-	res, err := self.searchRepository.InsertBatch(source)
+	res, err := self.booksRepository.InsertBatch(source)
 
 	return uint(res), err
 }
@@ -71,12 +70,11 @@ func (self *InpParserCase) parseInpx(inpx string, progress *domain.ParseProgress
 }
 
 func (self *InpParserCase) RebuildDb(progress *domain.ParseProgress) {
-	// self.booksRepository.RebuildDb()
-	self.searchRepository.Clean()
+	self.booksRepository.RebuildDb()
 	self.parseInpx("files/flibusta_fb2_local.inpx", progress)
 
 }
 
-func NewInpParserCase(booksRepository *repositories.BooksRepository, searchRepository *repositories.SearchRepository) *InpParserCase {
-	return &InpParserCase{booksRepository: booksRepository, searchRepository: searchRepository}
+func NewInpParserCase(booksRepository *repositories.BooksRepository) *InpParserCase {
+	return &InpParserCase{booksRepository: booksRepository}
 }

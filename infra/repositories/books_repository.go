@@ -14,7 +14,7 @@ type BooksRepository struct {
 	pool *pgxpool.Pool
 }
 
-var fields string = "id, title, authors, series, serno, file, path, lang, size"
+var fields string = "id, title, authors, series, serno, lang, size"
 var ruWhere string = "to_tsvector('russian', search) @@ websearch_to_tsquery('russian', $1)"
 var enWhere string = "to_tsvector('simple', search) @@ websearch_to_tsquery('simple', $1)"
 
@@ -29,7 +29,7 @@ func searchQuery(q string) string {
 var byIdQuery = "SELECT " + fields + " FROM books WHERE id = $1 LIMIT 1"
 
 func scanRow(rows pgx.Row, book *domain.Book) error {
-	return rows.Scan(&book.Id, &book.Title, &book.Authors, &book.Series, &book.Serno, &book.File, &book.Path, &book.Lang, &book.Size)
+	return rows.Scan(&book.Id, &book.Title, &book.Authors, &book.Series, &book.Serno, &book.Lang, &book.Size)
 }
 
 func (self BooksRepository) SearchBooks(q string) ([]domain.Book, error) {
@@ -80,7 +80,7 @@ func (self BooksRepository) RebuildDb() {
 
 func (self BooksRepository) InsertBatch(rows pgx.CopyFromSource) (uint64, error) {
 	tableName := pgx.Identifier{"books"}
-	columns := []string{"title", "search", "authors", "series", "serno", "file", "path", "lang", "size"}
+	columns := []string{"id", "title", "search", "authors", "series", "serno", "lang", "size"}
 
 	res, err := self.pool.CopyFrom(context.Background(), tableName, columns, rows)
 

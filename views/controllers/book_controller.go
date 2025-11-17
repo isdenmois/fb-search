@@ -13,8 +13,7 @@ import (
 )
 
 type BookController struct {
-	booksRepository  *repositories.BooksRepository
-	searchRepository *repositories.SearchRepository
+	booksRepository *repositories.BooksRepository
 }
 
 func (self BookController) search(c *gin.Context) {
@@ -26,25 +25,6 @@ func (self BookController) search(c *gin.Context) {
 	}
 
 	books, err := self.booksRepository.SearchBooks(strings.ToLower(q))
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, books)
-
-}
-
-func (self BookController) search2(c *gin.Context) {
-	q := c.Query("q")
-
-	if len(q) < 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Q should be at least 2 symbols"})
-		return
-	}
-
-	books, err := self.searchRepository.Search(strings.ToLower(q))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -71,25 +51,24 @@ func filterASCII(s string) string {
 }
 
 func (self BookController) downloadFile(c *gin.Context) {
-	file, err := self.booksRepository.FindFileById(c.Param("id"))
+	file := c.Param("file")
+	path := c.Param("path")
+	id := file + "/" + path
 
+	book, err := self.booksRepository.FindFileById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if file.Path == nil || len(*file.Path) == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "no path"})
-		return
-	}
 
-	r, err := zip.OpenReader("files/" + *file.File)
+	r, err := zip.OpenReader("files/" + file)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "can't open zip"})
 		return
 	}
 	defer r.Close() // Ensure the reader is closed when done
 
-	fb2, err := r.Open(*file.Path)
+	fb2, err := r.Open(path)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "can't open fb2"})
 		return
@@ -102,7 +81,7 @@ func (self BookController) downloadFile(c *gin.Context) {
 		return
 	}
 
-	filename := filterASCII(*file.Authors) + "." + filterASCII(file.Title)
+	filename := filterASCII(*book.Authors) + "." + filterASCII(book.Title)
 
 	c.Header("Content-Disposition", "attachment; filename=\""+filename+".fb2\"")
 	c.Header("Content-Length", strconv.Itoa(len(data)))
@@ -111,12 +90,11 @@ func (self BookController) downloadFile(c *gin.Context) {
 
 func (self BookController) Bind(r *gin.Engine) error {
 	r.GET("/api/search", self.search)
-	r.GET("/api/v2/search", self.search2)
-	r.GET("/dl/:id", self.downloadFile)
+	r.GET("/dl/:file/:path", self.downloadFile)
 
 	return nil
 }
 
-func NewBookController(booksRepository *repositories.BooksRepository, searchRepository *repositories.SearchRepository) *BookController {
-	return &BookController{booksRepository: booksRepository, searchRepository: searchRepository}
+func NewBookController(booksRepository *repositories.BooksRepository) *BookController {
+	return &BookController{booksRepository: booksRepository}
 }

@@ -61,15 +61,15 @@ func (c *CsvCopyFromSource) Next() bool {
 		search := strings.Join(searchA, " ")
 		search = utils.TruncString(strings.TrimSpace(search))
 		search = strings.ToLower(search)
+		id := c.zipFile + "/" + path
 
 		c.currentRow = []interface{}{
+			id,
 			title,
 			search,
 			authors,
 			series,
 			serno,
-			c.zipFile,
-			path,
 			lang,
 			size,
 		}

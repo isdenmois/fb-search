@@ -14,14 +14,6 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - pgnetwork
-  typesense:
-    image: typesense/typesense:29.0
-    restart: on-failure
-    ports:
-      - '8108:8108'
-    volumes:
-      - ./data:/data
-    command: '--data-dir /data --api-key=xyz --enable-cors'
   # webapp:
   #   build: .
   #   ports:
@@ -32,21 +24,6 @@ services:
   #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb?sslmode=disable
   #   depends_on:
   #     - db
-  #   networks:
-  #     - pgnetwork
-  # adminapp:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.admin
-  #   ports:
-  #     - '8080:8080'
-  #   volumes:
-  #     - .:/app
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/fb?sslmode=disable
-  #   depends_on:
-  #     - db
-  #     - webapp
   #   networks:
   #     - pgnetwork
 volumes:
