@@ -1,34 +1,32 @@
-import { defineConfig, loadEnv } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
-// import { analyzer } from 'vite-bundle-analyzer'
-import UnoCSS from 'unocss/vite'
-import { presetUno } from 'unocss'
+import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import UnoCSS from 'unocss/vite'
+import { defineConfig } from 'vite'
+import { configDefaults } from 'vitest/config'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
     plugins: [
-      svelte(),
-      UnoCSS({
-        presets: [presetUno({ preflight: false })],
-      }),
+      vue(),
+      UnoCSS(),
       // analyzer(),
     ],
     server: {
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
         },
         '/dl': {
-          target: 'http://localhost:3000',
+          target: 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
         },
         '/cover': {
-          target: 'http://localhost:3000',
+          target: 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
         },
@@ -42,6 +40,7 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
+        '@': fileURLToPath(new URL('./web/src', import.meta.url)),
         pages: resolve(__dirname, 'web/pages'),
         features: resolve(__dirname, 'web/features'),
         entities: resolve(__dirname, 'web/entities'),
@@ -49,18 +48,10 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
-      environment: 'happy-dom',
-      isolate: false,
-      fileParallelism: false,
-      poolOptions: {
-        forks: {
-          isolate: false,
-        },
-      },
-      setupFiles: ['@testing-library/svelte/vitest', 'vi-fetch/setup'],
-      alias: {
-        'svelte-routing': resolve('./src/shared/test/svelte-routing'),
-      },
+      environment: 'jsdom',
+      exclude: [...configDefaults.exclude, 'e2e/**'],
+      root: fileURLToPath(new URL('./', import.meta.url)),
+      setupFiles: ['./web/vitest.setup.ts'],
     },
   }
 })

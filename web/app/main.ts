@@ -1,9 +1,9 @@
 import 'uno.css'
 import '@unocss/reset/eric-meyer.css'
-import App from './app.svelte'
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
 
-const app = new App({
-  target: document.getElementById('app')!,
-})
-
-export default app
+const app = createApp(App)
+app.use(router)
+app.mount('#app')

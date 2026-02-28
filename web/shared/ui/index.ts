@@ -1,6 +1,7 @@
 import './colors.css'
 import './theme.css'
+
+export { default as LoadingSpinner } from './LoadingSpinner.vue'
+export { default as ItemCard } from './ItemCard.vue'
+export { default as InputField } from './InputField.vue'
 export * from './icons'
-export { default as Input } from './input.svelte'
-export { default as Item } from './item.svelte'
-export { default as Spinner } from './spinner.svelte'

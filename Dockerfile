@@ -1,5 +1,5 @@
-FROM oven/bun:1.3.1-alpine as myjs
-FROM golang:1.25.4-alpine AS mygo
+FROM oven/bun:1.3.9-alpine as myjs
+FROM golang:1.26-alpine AS mygo
 FROM alpine as myrun
 
 # install node_modules

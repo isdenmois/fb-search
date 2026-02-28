@@ -1,1 +1,1 @@
-export { default as BookItem } from './book-item.svelte'
+export { default as BookItem } from './BookItem.vue'
