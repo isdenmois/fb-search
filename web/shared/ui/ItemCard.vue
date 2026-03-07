@@ -11,7 +11,7 @@ const slots = useSlots()
 </script>
 
 <template>
-  <li class="flex flex-row items-center cursor-pointer" role="listitem">
+  <div class="flex flex-row items-center cursor-pointer">
     <div class="mr-1" v-if="slots.icon">
       <slot name="icon" />
     </div>
@@ -23,5 +23,5 @@ const slots = useSlots()
 
       <div v-if="subtitle" class="text-xs text-secondary">{{ subtitle }}</div>
     </div>
-  </li>
+  </div>
 </template>

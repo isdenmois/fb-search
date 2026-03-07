@@ -1,8 +1,8 @@
 import { http } from './client'
 
 export interface Book {
-  id: number
-  lang: string
+  id: string
+  lang?: string
   authors?: string
   title: string
   size?: number

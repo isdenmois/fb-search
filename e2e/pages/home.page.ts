@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test'
 
 export interface Book {
-  id: number
+  id: string
   lang: string
   authors?: string
   title: string
@@ -18,7 +18,7 @@ export class HomePage {
   constructor(private readonly page: Page) {
     this.searchInput = page.getByRole('textbox')
     this.results = page.getByRole('list')
-    this.loadingSpinner = page.locator('.spinner')
+    this.loadingSpinner = page.getByRole('progressbar')
   }
 
   async goto(): Promise<void> {

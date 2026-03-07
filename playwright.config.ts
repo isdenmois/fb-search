@@ -16,7 +16,10 @@ export default defineConfig({
     headless: true,
     viewport: { width: 1280, height: 720 },
     trace: 'on-first-retry',
+    colorScheme: 'dark',
   },
+
+  fullyParallel: true,
 
   // Start the Vite dev server before tests run
   // and also start the Go backend

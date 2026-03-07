@@ -3,3 +3,6 @@ build:
 
 run:
     go run parser/*.go
+
+test:
+    go test ./...

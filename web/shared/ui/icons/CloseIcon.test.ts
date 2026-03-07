@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/vue'
 import CloseIcon from './CloseIcon.vue'
 
 describe('CloseIcon', () => {
-  it.only('renders SVG element', () => {
+  it('renders SVG element', () => {
     // arrange
     render(CloseIcon)
 

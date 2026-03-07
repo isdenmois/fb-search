@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+
 import { api } from 'shared/api'
 import type { ParseProgress } from 'shared/api/fb'
 
-let progress: ParseProgress | null = null
-let rebuilding = false
+const progress = ref<ParseProgress | null>(null)
+const rebuilding = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const fetchProgress = async () => {
   try {
-    progress = await api.parse.getProgress()
+    progress.value = await api.parse.getProgress()
   } catch (e) {
     console.error(e)
   }
 }
 
 const startRebuild = async () => {
-  rebuilding = true
+  rebuilding.value = true
   interval = setInterval(fetchProgress, 500)
 
   try {
-    progress = await api.parse.rebuild()
+    progress.value = await api.parse.rebuild()
   } catch (e) {
     console.error(e)
   } finally {
-    rebuilding = false
+    rebuilding.value = false
     if (interval) {
       clearInterval(interval)
       interval = null
@@ -33,6 +34,12 @@ const startRebuild = async () => {
 }
 
 onMounted(fetchProgress)
+onUnmounted(() => {
+  if (interval) {
+    clearInterval(interval)
+    interval = null
+  }
+})
 </script>
 
 <template>
@@ -47,7 +54,7 @@ onMounted(fetchProgress)
       {{ rebuilding ? 'Rebuilding...' : 'Rebuild Database' }}
     </button>
 
-    <div v-if="progress" class="mt-4 text-white">
+    <div v-if="progress?.books" class="mt-4 text-white">
       <p>Files: {{ progress.files }}</p>
       <p>Books: {{ progress.books }}</p>
       <p>Time: {{ progress.time }} ms</p>

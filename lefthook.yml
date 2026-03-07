@@ -1,0 +1,31 @@
+pre-commit:
+  parallel: true
+  commands:
+    go:
+      glob:
+        - '*.go'
+      run: gofmt -l -w {staged_files}
+      stage_fixed: true
+
+    typescript:
+      glob:
+        - '*.{ts,tsx,vue}'
+      run: bun run lint:fix {staged_files}
+      stage_fixed: true
+
+    prettier:
+      glob:
+        - '*.{ts,tsx,vue,json,hmtl,css}'
+      run: prettier -w {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    go-test:
+      glob:
+        - '*.go'
+      run: go test ./...
+    vitest:
+      run: bun run test
+    playwright:
+      run: bun run playwright

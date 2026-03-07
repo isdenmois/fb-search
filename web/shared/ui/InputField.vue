@@ -17,8 +17,12 @@ const clear = () => {
   <div class="input flex relative items-center gap-2">
     <slot />
 
-    <input class="flex-1 py-2 rounded-md" :disabled="disabled" :value="modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" />
+    <input
+      class="flex-1 py-2 rounded-md"
+      :disabled="disabled"
+      :value="modelValue"
+      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+    />
 
     <div v-if="modelValue && !disabled" data-testid="clear" class="cursor-pointer px-2 z-10" @click="clear">
       <CloseIcon />

@@ -8,8 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type InpParser interface {
+	RebuildDb(progress *domain.ParseProgress)
+}
+
 type ParserController struct {
-	inpParser *app.InpParserCase
+	inpParser InpParser
 	progress  *domain.ParseProgress
 }
 
@@ -22,7 +26,9 @@ func (ctrl ParserController) getParseData(c *gin.Context) {
 }
 
 func (ctrl ParserController) parse(c *gin.Context) {
-	ctrl.progress = &domain.ParseProgress{}
+	ctrl.progress.Files = 0
+	ctrl.progress.Books = 0
+	ctrl.progress.Time = 0
 
 	ctrl.inpParser.RebuildDb(ctrl.progress)
 
@@ -36,9 +42,11 @@ func (ctrl ParserController) Bind(r *gin.Engine) error {
 	return nil
 }
 
-func NewParserController(inpParser *app.InpParserCase) *ParserController {
+func NewParserController(inpParser InpParser) *ParserController {
 	return &ParserController{
 		inpParser: inpParser,
 		progress:  &domain.ParseProgress{},
 	}
 }
+
+var _ InpParser = (*app.InpParserCase)(nil)

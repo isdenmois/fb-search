@@ -83,6 +83,11 @@ func NewBookController(booksRepository *repositories.BooksRepository) *BookContr
 │   ├── controllers/  # API endpoints (search, download, parse)
 │   ├── di.go        # Dependency injection setup
 │   └── views.go     # HTTP server initialization
+├── tests/            # Go integration tests
+│   ├── integration/  # Controller and repository tests
+│   ├── testhelpers/  # Test infrastructure (testcontainers)
+│   ├── fixtures/     # Test data (sample books)
+│   └── mocks/        # Mock implementations
 ├── scripts/          # Build and migration scripts (TypeScript)
 ├── web/              # Vue frontend
 │   ├── app/         # Vue entry point, App.vue
@@ -265,6 +270,41 @@ const api = wretch(BASE_URL).headers({ 'Content-Type': 'application/json' })
 
 ## Testing & QA
 
+### Go Integration Tests
+
+Located in `tests/` directory:
+
+- `tests/integration/` - HTTP controller and repository integration tests
+- `tests/testhelpers/` - Test infrastructure (testcontainers database)
+- `tests/fixtures/` - Test data (sample books)
+- `tests/mocks/` - Mock implementations for testing
+
+```bash
+go test ./tests/integration/... -v
+```
+
+**Features:**
+
+- Uses **testcontainers-go** to spin up PostgreSQL containers automatically
+- Tests full HTTP request-response cycle with real database
+- 21 integration tests covering:
+  - `BookController`: search endpoint (Cyrillic/Latin queries, validation, limits)
+  - `ParserController`: parse endpoints with mocked parser
+  - `BooksRepository`: database operations (search, find by ID, rebuild)
+
+**Test Structure:**
+
+```go
+// tests/integration/book_controller_test.go
+type BookControllerSuite struct {
+    suite.Suite
+    db         *testhelpers.TestDatabase
+    repo       *repositories.BooksRepository
+    controller *controllers.BookController
+    router     *gin.Engine
+}
+```
+
 ### Unit Tests (Vitest)
 
 Located in `web/` directory:
@@ -294,9 +334,10 @@ vi.mock('wretch', async () => {
 
 ### E2E Tests (Playwright)
 
-Located in `playwright/tests/`:
+Located in `e2e/tests/`:
 
-- `playwright/tests/search.spec.ts` - Search flow tests
+- `e2e/tests/search.test.ts` - Search flow tests
+- `e2e/tests/admin.test.ts` - Admin page tests
 
 ```bash
 bun run playwright
