@@ -9,4 +9,5 @@ type Book struct {
 	Serno   *string `json:"serno"`
 	Lang    *string `json:"lang"`
 	Size    *uint   `json:"size"`
+	Rank    float32 `json:"rank"`
 }

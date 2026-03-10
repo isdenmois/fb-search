@@ -17,19 +17,21 @@ type BooksRepository struct {
 var fields string = "id, title, authors, series, serno, lang, size"
 var ruWhere string = "to_tsvector('russian', search) @@ websearch_to_tsquery('russian', $1)"
 var enWhere string = "to_tsvector('simple', search) @@ websearch_to_tsquery('simple', $1)"
+var ruRank string = "ts_rank(to_tsvector('russian', search), websearch_to_tsquery('russian', $1))"
+var enRank string = "ts_rank(to_tsvector('simple', search), websearch_to_tsquery('simple', $1))"
 
 func searchQuery(q string) string {
 	if utils.ContainsCyrillic(q) {
-		return "SELECT " + fields + " FROM books WHERE " + ruWhere + " LIMIT 100"
+		return "SELECT " + fields + ", " + ruRank + " as rank FROM books WHERE " + ruWhere + " ORDER BY rank DESC LIMIT 100"
 	}
 
-	return "SELECT " + fields + " FROM books WHERE " + enWhere + " LIMIT 100"
+	return "SELECT " + fields + ", " + enRank + " as rank FROM books WHERE " + enWhere + " ORDER BY rank DESC LIMIT 100"
 }
 
-var byIdQuery = "SELECT " + fields + " FROM books WHERE id = $1 LIMIT 1"
+var byIdQuery = "SELECT " + fields + ", 0.0 as rank FROM books WHERE id = $1 LIMIT 1"
 
 func scanRow(rows pgx.Row, book *domain.Book) error {
-	return rows.Scan(&book.Id, &book.Title, &book.Authors, &book.Series, &book.Serno, &book.Lang, &book.Size)
+	return rows.Scan(&book.Id, &book.Title, &book.Authors, &book.Series, &book.Serno, &book.Lang, &book.Size, &book.Rank)
 }
 
 func (self BooksRepository) SearchBooks(q string) ([]domain.Book, error) {
