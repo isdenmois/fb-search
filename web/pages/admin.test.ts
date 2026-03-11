@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/vue'
+import { describe, expect, it, vi } from 'vitest'
 import Admin from './AdminPage.vue'
 
-vi.mock('shared/api', () => ({
+vi.mock('@/shared/api', () => ({
   api: {
     parse: {
       getProgress: vi.fn(),

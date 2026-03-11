@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-
-import { api } from 'shared/api'
-import type { ParseProgress } from 'shared/api/fb'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { api } from '@/shared/api'
+import type { ParseProgress } from '@/shared/api/parse'
 
 const progress = ref<ParseProgress | null>(null)
 const rebuilding = ref(false)

@@ -201,9 +201,9 @@ func (c BookController) Bind(r *gin.Engine) error {
 
 ```typescript
 // Using wretch for type-safe requests
-import { wretch } from 'wretch'
+import { wretch } from "wretch";
 
-const api = wretch(BASE_URL).headers({ 'Content-Type': 'application/json' })
+const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 ```
 
 **Component Structure:**
@@ -264,8 +264,7 @@ const api = wretch(BASE_URL).headers({ 'Content-Type': 'application/json' })
 
 ### Code Quality
 
-- **ESLint** + TypeScript plugin
-- **Prettier**
+- **Biome** - Lint and Formatter
 - **just** (optional) - CLI command runner
 
 ## Testing & QA
@@ -351,8 +350,8 @@ class HomePage {
   constructor(private page: Page) {}
 
   async search(query: string) {
-    await this.page.getByPlaceholder('Введите название...').fill(query)
-    await this.page.getByRole('button', { name: 'Найти' }).click()
+    await this.page.getByPlaceholder("Введите название...").fill(query);
+    await this.page.getByRole("button", { name: "Найти" }).click();
   }
 }
 ```

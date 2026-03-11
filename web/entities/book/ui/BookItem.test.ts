@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/vue'
+import { describe, expect, it } from 'vitest'
+import type { Book } from '@/shared/api/fb'
 import BookItem from './BookItem.vue'
 
 function createBook(overrides?: Partial<Book>): Book {
@@ -23,7 +24,7 @@ describe('BookItem', () => {
 
     // act
     const title = screen.getByText(book.title)
-    const authors = screen.getByText(book.authors!)
+    const authors = screen.getByText(book.authors || '___')
 
     // assert
     expect(title).toBeInTheDocument()

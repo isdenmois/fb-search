@@ -9,14 +9,8 @@ pre-commit:
 
     typescript:
       glob:
-        - '*.{ts,tsx,vue}'
-      run: bun run lint:fix {staged_files}
-      stage_fixed: true
-
-    prettier:
-      glob:
-        - '*.{ts,tsx,vue,json,hmtl,css}'
-      run: prettier -w {staged_files}
+        - '*.{ts,tsx,vue,css,json}'
+      run: bunx biome check --write {staged_files}
       stage_fixed: true
 
 pre-push:

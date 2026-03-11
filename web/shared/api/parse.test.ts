@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getProgress, rebuild } from './parse'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { http } from './client'
+import { getProgress, rebuild } from './parse'
 
 vi.mock('./client', () => ({
   http: {

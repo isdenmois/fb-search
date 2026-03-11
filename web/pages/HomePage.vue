@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { api } from 'shared/api'
-import type { Book } from 'shared/api/fb'
-import { InputField, SearchIcon, LoadingSpinner } from 'shared/ui'
-import { BookItem } from 'entities/book'
-import { getErrorMessage } from 'shared/lib'
+import { BookItem } from '@/entities/book'
+import { api } from '@/shared/api'
+import type { Book } from '@/shared/api/fb'
+import { getErrorMessage } from '@/shared/lib'
+import { InputField, LoadingSpinner, SearchIcon } from '@/shared/ui'
 
 const query = ref('')
 const books = ref<Book[] | null>(null)

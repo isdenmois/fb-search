@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/vue'
+import { describe, expect, it } from 'vitest'
 import CloseIcon from './CloseIcon.vue'
 
 describe('CloseIcon', () => {

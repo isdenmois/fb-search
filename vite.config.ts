@@ -1,6 +1,5 @@
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { defineConfig } from 'vite'
 import { configDefaults } from 'vitest/config'
@@ -40,11 +39,7 @@ export default defineConfig(() => {
     },
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./web/src', import.meta.url)),
-        pages: resolve(__dirname, 'web/pages'),
-        features: resolve(__dirname, 'web/features'),
-        entities: resolve(__dirname, 'web/entities'),
-        shared: resolve(__dirname, 'web/shared'),
+        '@': fileURLToPath(new URL('./web', import.meta.url)),
       },
     },
     test: {

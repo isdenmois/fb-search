@@ -1,8 +1,12 @@
-import { WretchError } from 'wretch/resolver'
+import type { WretchError } from 'wretch'
+
+function isWretchError(error: unknown): error is WretchError {
+  return error instanceof Error && 'status' in error && typeof (error as WretchError).status === 'number'
+}
 
 export const getErrorMessage = (error: unknown): string => {
   if (error && typeof error === 'object') {
-    if ('json' in error && error instanceof WretchError) {
+    if ('json' in error && isWretchError(error)) {
       return getErrorMessage(error.json)
     }
 

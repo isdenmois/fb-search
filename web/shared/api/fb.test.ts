@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { search } from './fb'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { http } from './client'
+import { search } from './fb'
 
 vi.mock('./client', () => ({
   http: {

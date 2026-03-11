@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
-import { api } from 'shared/api'
+import { render, screen } from '@testing-library/vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { api } from '@/shared/api'
+import type { Book } from '@/shared/api/fb'
 import HomePage from './HomePage.vue'
-import type { Book } from 'shared/api/fb'
 import { home } from './home.po'
 
-vi.mock('shared/api', () => ({
+vi.mock('@/shared/api', () => ({
   api: {
     fb: {
       search: vi.fn(),
