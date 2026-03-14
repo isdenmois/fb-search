@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.9-alpine as myjs
+FROM oven/bun:1.3.10-alpine as myjs
 FROM golang:1.26-alpine AS mygo
 FROM alpine as myrun
 
