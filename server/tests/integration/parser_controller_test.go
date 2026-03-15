@@ -3,12 +3,13 @@ package integration
 import (
 	"context"
 	"encoding/json"
-	"fb-search/domain"
-	"fb-search/tests/mocks"
-	"fb-search/views/controllers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"fb-search/domain"
+	"fb-search/tests/mocks"
+	"fb-search/views/controllers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"

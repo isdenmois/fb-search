@@ -2,15 +2,16 @@ package app
 
 import (
 	"archive/zip"
-	"fb-search/domain"
-	"fb-search/infra/repositories"
-	"fb-search/shared"
-	"fb-search/shared/utils"
 	"fmt"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"fb-search/domain"
+	"fb-search/infra/repositories"
+	"fb-search/shared"
+	"fb-search/shared/utils"
 
 	"golang.org/x/text/transform"
 )
@@ -52,7 +53,6 @@ func (self *InpParserCase) parseInpx(inpx string, progress *domain.ParseProgress
 
 	for _, f := range r.File {
 		if strings.HasSuffix(f.Name, ".inp") {
-
 			wg.Go(func() {
 				parsed, _ := self.parseInp(f)
 
@@ -72,7 +72,6 @@ func (self *InpParserCase) parseInpx(inpx string, progress *domain.ParseProgress
 func (self *InpParserCase) RebuildDb(progress *domain.ParseProgress) {
 	self.booksRepository.RebuildDb()
 	self.parseInpx("files/flibusta_fb2_local.inpx", progress)
-
 }
 
 func NewInpParserCase(booksRepository *repositories.BooksRepository) *InpParserCase {

@@ -2,11 +2,12 @@ package integration
 
 import (
 	"context"
+	"testing"
+
 	"fb-search/domain"
 	"fb-search/infra/repositories"
 	"fb-search/tests/fixtures"
 	"fb-search/tests/testhelpers"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"

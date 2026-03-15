@@ -1,8 +1,9 @@
 package mocks
 
 import (
-	"fb-search/domain"
 	"sync"
+
+	"fb-search/domain"
 )
 
 type MockInpParser struct {

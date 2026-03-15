@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"archive/zip"
-	"fb-search/infra/repositories"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"fb-search/infra/repositories"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mozillazg/go-unidecode"
@@ -25,14 +26,12 @@ func (self BookController) search(c *gin.Context) {
 	}
 
 	books, err := self.booksRepository.SearchBooks(strings.ToLower(q))
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, books)
-
 }
 
 func filterASCII(s string) string {

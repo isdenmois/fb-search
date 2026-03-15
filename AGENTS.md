@@ -11,10 +11,10 @@
 The project is a **monorepo** with two distinct stacks:
 
 1. **Backend (Go)**: REST API server using Gin framework
-   - Entry point: `main.go`
+   - Entry point: `server/main.go`
    - Dependency injection via `sarulabs/di`
    - PostgreSQL database via `pgx/v5`
-   - HTTP controllers in `views/controllers/`
+   - HTTP controllers in `server/views/controllers/`
 
 2. **Frontend (Vue 3)**: SPA using Vite + UnoCSS
    - Entry point: `web/app/main.ts`
@@ -35,17 +35,17 @@ User Browser (Vue SPA)
 
 **Key components:**
 
-- **Domain layer** (`domain/`): Pure Go structs (`Book`, `ParseProgress`)
-- **App layer** (`app/`): Business logic (INP parser)
-- **Infrastructure** (`infra/`): Database connections, repositories
-- **Views layer** (`views/`): HTTP controllers, DI configuration
+- **Domain layer** (`server/domain/`): Pure Go structs (`Book`, `ParseProgress`)
+- **App layer** (`server/app/`): Business logic (INP parser)
+- **Infrastructure** (`server/infra/`): Database connections, repositories
+- **Views layer** (`server/views/`): HTTP controllers, DI configuration
 
 ### Dependency Injection Pattern
 
 Backend uses constructor injection via `sarulabs/di`:
 
 ```go
-// views/di.go
+// server/views/di.go
 func CreateDi() (di.Container, error) {
     builder, _ := di.NewEnhancedBuilder()
     builder.Add(DbDef)
@@ -72,22 +72,25 @@ func NewBookController(booksRepository *repositories.BooksRepository) *BookContr
 
 ```
 .
-├── app/              # Business logic (INP parser for Flibusta format)
-├── domain/           # Domain entities (Book, ParseProgress)
-├── infra/            # Infrastructure layer
-│   ├── db/          # Database connection, migrations
-│   └── repositories/ # Data access layer (BooksRepository)
-├── migrations/       # PostgreSQL schema migrations
-├── parser/           # Book parsing logic
-├── views/            # HTTP layer
-│   ├── controllers/  # API endpoints (search, download, parse)
-│   ├── di.go        # Dependency injection setup
-│   └── views.go     # HTTP server initialization
-├── tests/            # Go integration tests
-│   ├── integration/  # Controller and repository tests
-│   ├── testhelpers/  # Test infrastructure (testcontainers)
-│   ├── fixtures/     # Test data (sample books)
-│   └── mocks/        # Mock implementations
+├── server/              # Go backend
+│   ├── main.go         # Entry point
+│   ├── app/            # Business logic (INP parser for Flibusta format)
+│   ├── domain/         # Domain entities (Book, ParseProgress)
+│   ├── infra/         # Infrastructure layer
+│   │   ├── db/        # Database connection, migrations
+│   │   └── repositories/ # Data access layer (BooksRepository)
+│   ├── migrations/    # PostgreSQL schema migrations
+│   ├── parser/        # Book parsing logic
+│   ├── shared/        # Shared utilities
+│   ├── views/         # HTTP layer
+│   │   ├── controllers/ # API endpoints (search, download, parse)
+│   │   ├── di.go     # Dependency injection setup
+│   │   └── views.go  # HTTP server initialization
+│   └── tests/         # Go integration tests
+│       ├── integration/ # Controller and repository tests
+│       ├── testhelpers/ # Test infrastructure (testcontainers)
+│       ├── fixtures/  # Test data (sample books)
+│       └── mocks/     # Mock implementations
 ├── scripts/          # Build and migration scripts (TypeScript)
 ├── web/              # Vue frontend
 │   ├── app/         # Vue entry point, App.vue
@@ -107,10 +110,10 @@ func NewBookController(booksRepository *repositories.BooksRepository) *BookContr
 
 ```bash
 # Run development server
-go run main.go
+cd server && go run main.go
 
 # Build production binary
-go build -ldflags="-s -w" -o dist/fb-search parser/*.go
+cd server && go build -ldflags="-s -w" -o ../dist/fb-search .
 
 # Run via just (if installed)
 just run
@@ -216,9 +219,9 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 
 ### Backend Entry Points
 
-- `main.go` - Application bootstrap, DI setup
-- `views/di.go` - Dependency injection configuration
-- `views/views.go` - HTTP server initialization
+- `server/main.go` - Application bootstrap, DI setup
+- `server/views/di.go` - Dependency injection configuration
+- `server/views/views.go` - HTTP server initialization
 
 ### Frontend Entry Points
 
@@ -228,7 +231,7 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 
 ### Configuration
 
-- `go.mod` - Go dependencies (Gin, pgx, di, migrate)
+- `server/go.mod` - Go dependencies (Gin, pgx, di, migrate)
 - `package.json` - TypeScript/Bun dependencies (Vue, Vite, Vitest, Playwright)
 - `tsconfig.json` - TypeScript compiler options
 - `tsconfig.web.json` - Web-specific config with path aliases
@@ -237,10 +240,10 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 
 ### Data Layer
 
-- `infra/db/db.go` - PostgreSQL connection, migration runner
-- `infra/repositories/books_repository.go` - Books data access
-- `domain/book.go` - Book entity definition
-- `migrations/` - SQL schema migrations
+- `server/infra/db/db.go` - PostgreSQL connection, migration runner
+- `server/infra/repositories/books_repository.go` - Books data access
+- `server/domain/book.go` - Book entity definition
+- `server/migrations/` - SQL schema migrations
 
 ## Runtime/Tooling Preferences
 

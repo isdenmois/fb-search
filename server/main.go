@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fb-search/views"
 	"fmt"
 	"os"
+
+	"fb-search/views"
 
 	"github.com/joho/godotenv"
 )
@@ -11,7 +12,6 @@ import (
 func main() {
 	godotenv.Load()
 	di, err := views.CreateDi()
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to start app: %v\n", err)
 		os.Exit(1)

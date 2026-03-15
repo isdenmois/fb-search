@@ -1,9 +1,10 @@
 package app
 
 import (
-	"fb-search/shared"
 	"strings"
 	"testing"
+
+	"fb-search/shared"
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/transform"

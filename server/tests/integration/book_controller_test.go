@@ -3,14 +3,15 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"fb-search/domain"
 	"fb-search/infra/repositories"
 	"fb-search/tests/fixtures"
 	"fb-search/tests/testhelpers"
 	"fb-search/views/controllers"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"

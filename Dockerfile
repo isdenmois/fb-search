@@ -21,11 +21,11 @@ ENV GOARCH=amd64
 RUN go env -w GOCACHE=/go-cache
 RUN go env -w GOMODCACHE=/gomod-cache
 
-COPY go.mod go.sum ./
+COPY server/go.mod server/go.sum ./
 RUN --mount=type=cache,target=/gomod-cache \
     go mod download
 
-COPY . .
+COPY server/ ./
 RUN --mount=type=cache,target=/gomod-cache --mount=type=cache,target=/go-cache \
     go build -ldflags="-s -w" -o main .
 
@@ -33,5 +33,5 @@ FROM myrun
 WORKDIR /app
 COPY --from=go-builder /app/main .
 COPY --from=js-builder /app/public public
-COPY migrations migrations 
+COPY server/migrations migrations
 CMD ["./main"]

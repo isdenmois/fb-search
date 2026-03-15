@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"context"
+	"fmt"
+
 	"fb-search/domain"
 	"fb-search/shared/utils"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,11 +15,13 @@ type BooksRepository struct {
 	pool *pgxpool.Pool
 }
 
-var fields string = "id, title, authors, series, serno, lang, size"
-var ruWhere string = "to_tsvector('russian', search) @@ websearch_to_tsquery('russian', $1)"
-var enWhere string = "to_tsvector('simple', search) @@ websearch_to_tsquery('simple', $1)"
-var ruRank string = "ts_rank(to_tsvector('russian', search), websearch_to_tsquery('russian', $1))"
-var enRank string = "ts_rank(to_tsvector('simple', search), websearch_to_tsquery('simple', $1))"
+var (
+	fields  string = "id, title, authors, series, serno, lang, size"
+	ruWhere string = "to_tsvector('russian', search) @@ websearch_to_tsquery('russian', $1)"
+	enWhere string = "to_tsvector('simple', search) @@ websearch_to_tsquery('simple', $1)"
+	ruRank  string = "ts_rank(to_tsvector('russian', search), websearch_to_tsquery('russian', $1))"
+	enRank  string = "ts_rank(to_tsvector('simple', search), websearch_to_tsquery('simple', $1))"
+)
 
 func searchQuery(q string) string {
 	if utils.ContainsCyrillic(q) {
@@ -38,7 +41,6 @@ func (self BooksRepository) SearchBooks(q string) ([]domain.Book, error) {
 	query := searchQuery(q)
 
 	rows, err := self.pool.Query(context.Background(), query, q)
-
 	if err != nil {
 		fmt.Println("Query error: ", err.Error())
 		return nil, err

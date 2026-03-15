@@ -7,24 +7,10 @@ import { configDefaults } from 'vitest/config'
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   return {
-    plugins: [
-      vue(),
-      UnoCSS(),
-      // analyzer(),
-    ],
+    plugins: [vue(), UnoCSS()],
     server: {
       proxy: {
-        '/api': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/dl': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/cover': {
+        '^/(api|dl)': {
           target: 'http://localhost:8080',
           changeOrigin: true,
           secure: false,

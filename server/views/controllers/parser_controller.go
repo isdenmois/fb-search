@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"fb-search/app"
 	"fb-search/domain"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )

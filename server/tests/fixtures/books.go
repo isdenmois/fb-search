@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"context"
+
 	"fb-search/domain"
 
 	"github.com/jackc/pgx/v5/pgxpool"
