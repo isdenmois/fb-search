@@ -3,21 +3,22 @@ pre-commit:
   commands:
     go:
       glob:
-        - '*.go'
+        - "*.go"
       run: gofmt -l -w {staged_files}
       stage_fixed: true
 
     typescript:
       glob:
-        - '*.{ts,tsx,vue,css,json}'
+        - "*.{ts,tsx,vue,css,json}"
       run: bunx biome check --write {staged_files}
       stage_fixed: true
 
 pre-push:
+  parallel: true
   commands:
     go-test:
       glob:
-        - '*.go'
+        - "*.go"
       run: go test ./...
     vitest:
       run: bun run test
