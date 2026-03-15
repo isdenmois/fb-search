@@ -165,7 +165,7 @@ describe('HomePage', () => {
     expect(api.fb.search).toHaveBeenCalledWith('  test query  ')
   })
 
-  it.skip('handles API error gracefully', async () => {
+  it('handles API error gracefully', async () => {
     // arrange
     vi.mocked(api.fb.search).mockRejectedValue(Error('Search failed'))
 

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import InputField from './InputField.vue'
 
-describe.skip('InputField', () => {
+describe('InputField', () => {
   it('renders with correct value', () => {
     // arrange
     render(InputField, { props: { modelValue: 'test' } })
@@ -64,14 +64,15 @@ describe.skip('InputField', () => {
   it('clear button emits empty string', async () => {
     // arrange
     const user = userEvent.setup()
-    render(InputField, { props: { modelValue: 'test' } })
+    const { emitted } = render(InputField, { props: { modelValue: 'test' } })
 
     // act
     const clearButton = screen.getByTestId('clear')
     await user.click(clearButton)
 
     // assert
-    expect(screen.getByRole('textbox')).toHaveValue('')
+    expect(emitted('update:modelValue')).toHaveLength(1)
+    expect(emitted('update:modelValue')[0]).toEqual([''])
   })
 
   it('applies disabled attribute when disabled prop is true', () => {
