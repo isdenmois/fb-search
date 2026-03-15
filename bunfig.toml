@@ -1,2 +1,2 @@
 [install]
-defaultRange = "exact"
+exact = true
