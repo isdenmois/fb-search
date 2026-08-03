@@ -3,18 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"fb-search/app"
+	"fb-search/application/usecases"
 	"fb-search/domain"
 
 	"github.com/gin-gonic/gin"
 )
 
-type InpParser interface {
-	RebuildDb(progress *domain.ParseProgress)
-}
-
 type ParserController struct {
-	inpParser InpParser
+	inpParser usecases.ParserService
 	progress  *domain.ParseProgress
 }
 
@@ -43,11 +39,11 @@ func (ctrl ParserController) Bind(r *gin.Engine) error {
 	return nil
 }
 
-func NewParserController(inpParser InpParser) *ParserController {
+func NewParserController(inpParser usecases.ParserService) *ParserController {
 	return &ParserController{
 		inpParser: inpParser,
 		progress:  &domain.ParseProgress{},
 	}
 }
 
-var _ InpParser = (*app.InpParserCase)(nil)
+var _ usecases.ParserService = (*usecases.InpParserCase)(nil)

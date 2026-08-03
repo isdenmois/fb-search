@@ -1,4 +1,4 @@
-package app
+package usecases
 
 import (
 	"strings"
@@ -12,7 +12,7 @@ import (
 
 func TestNewInpParserCase(t *testing.T) {
 	// Arrange
-	parser := NewInpParserCase(nil)
+	parser := NewInpParserCase(nil, "files/flibusta_fb2_local.inpx")
 
 	// Act
 

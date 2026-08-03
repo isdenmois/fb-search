@@ -7,11 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"fb-search/application/usecases"
+	"fb-search/delivery/http/controllers"
 	"fb-search/domain"
-	"fb-search/infra/repositories"
+	"fb-search/infrastructure/repositories"
+	"fb-search/infrastructure/storage"
 	"fb-search/tests/fixtures"
 	"fb-search/tests/testhelpers"
-	"fb-search/views/controllers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -21,7 +23,7 @@ import (
 type BookControllerSuite struct {
 	suite.Suite
 	db         *testhelpers.TestDatabase
-	repo       *repositories.BooksRepository
+	repo       *repositories.PostgresBooksRepository
 	controller *controllers.BookController
 	router     *gin.Engine
 	ctx        context.Context
@@ -35,8 +37,12 @@ func (s *BookControllerSuite) SetupSuite() {
 	require.NoError(s.T(), err)
 	s.db = db
 
-	s.repo = repositories.NewBooksRepository(db.Pool)
-	s.controller = controllers.NewBookController(s.repo)
+	s.repo = repositories.NewPostgresBooksRepository(db.Pool)
+	fileStorage := storage.NewZipBookFileStorage("/nonexistent")
+	s.controller = controllers.NewBookController(
+		usecases.NewSearchBooksCase(s.repo),
+		usecases.NewDownloadBookCase(s.repo, fileStorage),
+	)
 
 	s.router = gin.New()
 	s.controller.Bind(s.router)

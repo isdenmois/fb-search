@@ -1,23 +1,30 @@
-package app
+package usecases
 
 import (
 	"archive/zip"
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"fb-search/application/ports"
 	"fb-search/domain"
-	"fb-search/infra/repositories"
 	"fb-search/shared"
 	"fb-search/shared/utils"
 
 	"golang.org/x/text/transform"
 )
 
+// ParserService is the port implemented by InpParserCase and mocked in tests.
+type ParserService interface {
+	RebuildDb(progress *domain.ParseProgress)
+}
+
 type InpParserCase struct {
-	booksRepository *repositories.BooksRepository
+	booksRepository ports.BookRepository
+	inpxPath        string
 }
 
 func (self *InpParserCase) parseInp(f *zip.File) (uint, error) {
@@ -35,13 +42,13 @@ func (self *InpParserCase) parseInp(f *zip.File) (uint, error) {
 	tr := transform.NewReader(file, shared.QuoteStripper{})
 
 	source := shared.NewCsvCopyFromSource(tr, zipFileName)
-	res, err := self.booksRepository.InsertBatch(source)
+	res, err := self.booksRepository.InsertBatch(context.Background(), source)
 
 	return uint(res), err
 }
 
-func (self *InpParserCase) parseInpx(inpx string, progress *domain.ParseProgress) error {
-	r, err := zip.OpenReader(inpx)
+func (self *InpParserCase) parseInpx(progress *domain.ParseProgress) error {
+	r, err := zip.OpenReader(self.inpxPath)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -70,10 +77,12 @@ func (self *InpParserCase) parseInpx(inpx string, progress *domain.ParseProgress
 }
 
 func (self *InpParserCase) RebuildDb(progress *domain.ParseProgress) {
-	self.booksRepository.RebuildDb()
-	self.parseInpx("files/flibusta_fb2_local.inpx", progress)
+	self.booksRepository.RebuildDb(context.Background())
+	self.parseInpx(progress)
 }
 
-func NewInpParserCase(booksRepository *repositories.BooksRepository) *InpParserCase {
-	return &InpParserCase{booksRepository: booksRepository}
+// NewInpParserCase wires the parser to its repository and the location of
+// the INPX index file (injected as a construction parameter for testability).
+func NewInpParserCase(booksRepository ports.BookRepository, inpxPath string) *InpParserCase {
+	return &InpParserCase{booksRepository: booksRepository, inpxPath: inpxPath}
 }

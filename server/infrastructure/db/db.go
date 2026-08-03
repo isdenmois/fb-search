@@ -43,8 +43,3 @@ func Connect() (*pgxpool.Pool, error) {
 
 	return pool, err
 }
-
-func RebuildDb(pool *pgxpool.Pool) {
-	pool.Exec(context.Background(), "TRUNCATE TABLE books RESTART IDENTITY")
-	pool.Exec(context.Background(), "VACUUM")
-}

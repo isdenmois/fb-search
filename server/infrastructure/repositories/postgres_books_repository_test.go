@@ -3,15 +3,17 @@ package repositories
 import (
 	"testing"
 
+	"fb-search/application/ports"
+
 	"github.com/stretchr/testify/require"
 )
 
 func TestSearchQuery_Cyrillic(t *testing.T) {
 	// arrange
-	q := "война и мир"
+	cfg := ports.SearchConfig{Language: "russian"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "russian")
@@ -21,10 +23,10 @@ func TestSearchQuery_Cyrillic(t *testing.T) {
 
 func TestSearchQuery_Latin(t *testing.T) {
 	// arrange
-	q := "war and peace"
+	cfg := ports.SearchConfig{Language: "simple"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "simple")
@@ -34,10 +36,10 @@ func TestSearchQuery_Latin(t *testing.T) {
 
 func TestSearchQuery_Mixed(t *testing.T) {
 	// arrange
-	q := "war and мир"
+	cfg := ports.SearchConfig{Language: "russian"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "russian")
@@ -45,10 +47,10 @@ func TestSearchQuery_Mixed(t *testing.T) {
 
 func TestSearchQuery_Numbers(t *testing.T) {
 	// arrange
-	q := "12345"
+	cfg := ports.SearchConfig{Language: "simple"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "simple")
@@ -56,10 +58,10 @@ func TestSearchQuery_Numbers(t *testing.T) {
 
 func TestSearchQuery_Empty(t *testing.T) {
 	// arrange
-	q := ""
+	cfg := ports.SearchConfig{Language: "simple"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "simple")
@@ -67,10 +69,10 @@ func TestSearchQuery_Empty(t *testing.T) {
 
 func TestSearchQuery_SpecialChars(t *testing.T) {
 	// arrange
-	q := "!@#$%^&*()"
+	cfg := ports.SearchConfig{Language: "simple"}
 
 	// act
-	result := searchQuery(q)
+	result := searchQuery(cfg)
 
 	// assert
 	require.Contains(t, result, "simple")

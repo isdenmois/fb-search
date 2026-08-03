@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"fb-search/application/ports"
 	"fb-search/domain"
-	"fb-search/infra/repositories"
+	"fb-search/infrastructure/repositories"
 	"fb-search/tests/fixtures"
 	"fb-search/tests/testhelpers"
 
@@ -16,7 +17,7 @@ import (
 type BooksRepositorySuite struct {
 	suite.Suite
 	db   *testhelpers.TestDatabase
-	repo *repositories.BooksRepository
+	repo *repositories.PostgresBooksRepository
 	ctx  context.Context
 }
 
@@ -27,7 +28,7 @@ func (s *BooksRepositorySuite) SetupSuite() {
 	require.NoError(s.T(), err)
 	s.db = db
 
-	s.repo = repositories.NewBooksRepository(db.Pool)
+	s.repo = repositories.NewPostgresBooksRepository(db.Pool)
 }
 
 func (s *BooksRepositorySuite) TearDownSuite() {
@@ -47,7 +48,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_CyrillicQuery() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks("война и мир")
+	books, err := s.repo.SearchBooks(s.ctx, "война и мир", ports.SearchConfig{Language: "russian"})
 
 	// assert
 	s.NoError(err)
@@ -62,7 +63,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_LatinQuery() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks("great gatsby")
+	books, err := s.repo.SearchBooks(s.ctx, "great gatsby", ports.SearchConfig{Language: "simple"})
 
 	// assert
 	s.NoError(err)
@@ -76,7 +77,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_MixedContent() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks("potter")
+	books, err := s.repo.SearchBooks(s.ctx, "potter", ports.SearchConfig{Language: "simple"})
 
 	// assert
 	s.NoError(err)
@@ -89,7 +90,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_NoResults() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks("nonexistentxyz")
+	books, err := s.repo.SearchBooks(s.ctx, "nonexistentxyz", ports.SearchConfig{Language: "simple"})
 
 	// assert
 	s.NoError(err)
@@ -123,7 +124,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_Limit100() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks("test")
+	books, err := s.repo.SearchBooks(s.ctx, "test", ports.SearchConfig{Language: "simple"})
 
 	// assert
 	s.NoError(err)
@@ -136,7 +137,7 @@ func (s *BooksRepositorySuite) TestFindFileById_Existing() {
 	s.NoError(err)
 
 	// act
-	book, err := s.repo.FindFileById("fb2-1.zip/1.fb2")
+	book, err := s.repo.FindById(s.ctx, "fb2-1.zip/1.fb2")
 
 	// assert
 	s.NoError(err)
@@ -149,7 +150,7 @@ func (s *BooksRepositorySuite) TestFindFileById_NotFound() {
 	s.NoError(err)
 
 	// act
-	book, err := s.repo.FindFileById("nonexistent.zip/file.fb2")
+	book, err := s.repo.FindById(s.ctx, "nonexistent.zip/file.fb2")
 
 	// assert
 	s.Error(err)
@@ -162,15 +163,16 @@ func (s *BooksRepositorySuite) TestRebuildDb() {
 	s.NoError(err)
 
 	// verify books exist
-	books, err := s.repo.SearchBooks("война")
+	books, err := s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: "russian"})
 	s.NoError(err)
 	s.NotEmpty(books)
 
 	// act
-	s.repo.RebuildDb()
+	err = s.repo.RebuildDb(s.ctx)
+	s.NoError(err)
 
 	// assert - table should be empty
-	books, err = s.repo.SearchBooks("война")
+	books, err = s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: "russian"})
 	s.NoError(err)
 	s.Empty(books)
 }

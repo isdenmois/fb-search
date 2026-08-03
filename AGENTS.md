@@ -14,7 +14,7 @@ The project is a **monorepo** with two distinct stacks:
    - Entry point: `server/main.go`
    - Dependency injection via `sarulabs/di`
    - PostgreSQL database via `pgx/v5`
-   - HTTP controllers in `server/views/controllers/`
+   - HTTP controllers in `server/delivery/http/controllers/`
 
 2. **Frontend (Vue 3)**: SPA using Vite + UnoCSS
    - Entry point: `web/app/main.ts`
@@ -36,20 +36,26 @@ User Browser (Vue SPA)
 **Key components:**
 
 - **Domain layer** (`server/domain/`): Pure Go structs (`Book`, `ParseProgress`)
-- **App layer** (`server/app/`): Business logic (INP parser)
-- **Infrastructure** (`server/infra/`): Database connections, repositories
-- **Views layer** (`server/views/`): HTTP controllers, DI configuration
+- **Application layer** (`server/application/`): Use cases + port interfaces
+  - `ports/`: `BookRepository`, `BookFileStorage` interfaces
+  - `usecases/`: `SearchBooksCase`, `DownloadBookCase`, `InpParserCase`
+- **Infrastructure** (`server/infrastructure/`): Adapters implementing ports (`db`, `repositories`, `storage`)
+- **Delivery layer** (`server/delivery/http/`): HTTP controllers, DI configuration
 
 ### Dependency Injection Pattern
 
 Backend uses constructor injection via `sarulabs/di`:
 
 ```go
-// server/views/di.go
+// server/delivery/http/di.go
 func CreateDi() (di.Container, error) {
     builder, _ := di.NewEnhancedBuilder()
     builder.Add(DbDef)
     builder.Add(BooksRepositoryDef)
+    builder.Add(BookFileStorageDef)
+    builder.Add(SearchBooksCaseDef)
+    builder.Add(DownloadBookCaseDef)
+    builder.Add(InpParserDef)
     builder.Add(ControllersDef)
     builder.Add(HttpServerDef)
     return builder.Build()
@@ -60,11 +66,12 @@ Controllers receive dependencies via constructor:
 
 ```go
 type BookController struct {
-    booksRepository *repositories.BooksRepository
+    searchBooksCase  *usecases.SearchBooksCase
+    downloadBookCase *usecases.DownloadBookCase
 }
 
-func NewBookController(booksRepository *repositories.BooksRepository) *BookController {
-    return &BookController{booksRepository: booksRepository}
+func NewBookController(searchBooksCase *usecases.SearchBooksCase, downloadBookCase *usecases.DownloadBookCase) *BookController {
+    return &BookController{searchBooksCase: searchBooksCase, downloadBookCase: downloadBookCase}
 }
 ```
 
@@ -74,18 +81,20 @@ func NewBookController(booksRepository *repositories.BooksRepository) *BookContr
 .
 ├── server/              # Go backend
 │   ├── main.go         # Entry point
-│   ├── app/            # Business logic (INP parser for Flibusta format)
-│   ├── domain/         # Domain entities (Book, ParseProgress)
-│   ├── infra/         # Infrastructure layer
+│   ├── domain/         # Pure domain entities (Book, ParseProgress)
+│   ├── application/    # Use cases + port interfaces
+│   │   ├── ports/      # BookRepository, BookFileStorage
+│   │   └── usecases/   # SearchBooks, DownloadBook, InpParser
+│   ├── infrastructure/ # Adapters implementing ports
 │   │   ├── db/        # Database connection, migrations
-│   │   └── repositories/ # Data access layer (BooksRepository)
-│   ├── migrations/    # PostgreSQL schema migrations
-│   ├── parser/        # Book parsing logic
-│   ├── shared/        # Shared utilities
-│   ├── views/         # HTTP layer
+│   │   ├── repositories/ # Data access layer (PostgresBooksRepository)
+│   │   └── storage/   # ZipBookFileStorage
+│   ├── delivery/http/ # Framework delivery layer
 │   │   ├── controllers/ # API endpoints (search, download, parse)
 │   │   ├── di.go     # Dependency injection setup
-│   │   └── views.go  # HTTP server initialization
+│   │   └── server.go  # HTTP server initialization
+│   ├── migrations/    # PostgreSQL schema migrations
+│   ├── shared/        # Pure helpers (csv, quote stripper, utils)
 │   └── tests/         # Go integration tests
 │       ├── integration/ # Controller and repository tests
 │       ├── testhelpers/ # Test infrastructure (testcontainers)
@@ -182,7 +191,8 @@ type Controller interface {
 }
 
 type BookController struct {
-    booksRepository *repositories.BooksRepository
+    searchBooksCase  *usecases.SearchBooksCase
+    downloadBookCase *usecases.DownloadBookCase
 }
 
 func (c BookController) Bind(r *gin.Engine) error {
@@ -220,8 +230,8 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 ### Backend Entry Points
 
 - `server/main.go` - Application bootstrap, DI setup
-- `server/views/di.go` - Dependency injection configuration
-- `server/views/views.go` - HTTP server initialization
+- `server/delivery/http/di.go` - Dependency injection configuration
+- `server/delivery/http/server.go` - HTTP server initialization
 
 ### Frontend Entry Points
 
@@ -240,8 +250,11 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 
 ### Data Layer
 
-- `server/infra/db/db.go` - PostgreSQL connection, migration runner
-- `server/infra/repositories/books_repository.go` - Books data access
+- `server/infrastructure/db/db.go` - PostgreSQL connection, migration runner
+- `server/infrastructure/repositories/postgres_books_repository.go` - Books data access
+- `server/infrastructure/storage/zip_book_file_storage.go` - Book archive reading
+- `server/application/ports/` - Port interfaces (BookRepository, BookFileStorage)
+- `server/application/usecases/` - Use cases (SearchBooksCase, DownloadBookCase, InpParserCase)
 - `server/domain/book.go` - Book entity definition
 - `server/migrations/` - SQL schema migrations
 
@@ -292,7 +305,7 @@ go test ./tests/integration/... -v
 - 21 integration tests covering:
   - `BookController`: search endpoint (Cyrillic/Latin queries, validation, limits)
   - `ParserController`: parse endpoints with mocked parser
-  - `BooksRepository`: database operations (search, find by ID, rebuild)
+  - `PostgresBooksRepository`: database operations (search, find by ID, rebuild)
 
 **Test Structure:**
 
@@ -301,7 +314,7 @@ go test ./tests/integration/... -v
 type BookControllerSuite struct {
     suite.Suite
     db         *testhelpers.TestDatabase
-    repo       *repositories.BooksRepository
+    repo       *repositories.PostgresBooksRepository
     controller *controllers.BookController
     router     *gin.Engine
 }

@@ -10,7 +10,7 @@ A book search application for the Flibusta library, enabling search and download
    - Entry point: `main.go`
    - Dependency injection via `sarulabs/di`
    - PostgreSQL database via `pgx/v5`
-   - HTTP controllers in `views/controllers/`
+   - HTTP controllers in `delivery/http/controllers/`
 
 2. **Frontend (Vue 3)**: SPA using Vite + UnoCSS
    - Entry point: `web/app/main.ts`
@@ -41,31 +41,34 @@ User Browser (Vue SPA)
 
 ```
 .
-├── app/              # Business logic (INP parser)
-├── domain/           # Domain entities (Book, ParseProgress)
-├── infra/            # Infrastructure layer
-│   ├── db/          # Database connection, migrations
-│   └── repositories/ # Data access layer
-├── migrations/       # PostgreSQL schema migrations
-├── parser/           # Book parsing logic
-├── views/            # HTTP layer
-│   ├── controllers/  # API endpoints
-│   ├── di.go        # Dependency injection setup
-│   └── views.go     # HTTP server initialization
-├── tests/            # Go integration tests
-│   ├── integration/  # Controller and repository tests
-│   ├── testhelpers/  # Test infrastructure
-│   ├── fixtures/     # Test data
-│   └── mocks/        # Mock implementations
-├── scripts/          # Build and migration scripts
-├── web/              # Vue frontend
-│   ├── app/         # Vue entry point, App.vue
-│   ├── pages/       # Page components
-│   ├── entities/    # API types and functions
-│   └── shared/      # Shared utilities
-├── playwright/       # E2E test suite
-├── files/            # Book archives (ZIP, INPX)
-└── public/           # Built frontend assets
+├── domain/                              # Pure entities (Book, ParseProgress)
+├── application/                         # Use cases + port interfaces
+│   ├── ports/                           # BookRepository, BookFileStorage
+│   └── usecases/                        # SearchBooks, DownloadBook, InpParser
+├── infrastructure/                      # Adapters implementing ports
+│   ├── db/                              # Database connection, migrations
+│   ├── repositories/                    # PostgresBooksRepository
+│   └── storage/                         # ZipBookFileStorage
+├── delivery/http/                       # Framework delivery layer
+│   ├── controllers/                     # API endpoints
+│   ├── di.go                            # Dependency injection setup
+│   └── server.go                        # HTTP server initialization
+├── migrations/                          # PostgreSQL schema migrations
+├── shared/                              # Pure helpers (csv, quote stripper, utils)
+├── tests/                               # Go integration tests
+│   ├── integration/                     # Controller and repository tests
+│   ├── testhelpers/                     # Test infrastructure
+│   ├── fixtures/                        # Test data
+│   └── mocks/                           # Mock implementations
+├── scripts/                             # Build and migration scripts
+├── web/                                 # Vue frontend
+│   ├── app/                             # Vue entry point, App.vue
+│   ├── pages/                           # Page components
+│   ├── entities/                        # API types and functions
+│   └── shared/                          # Shared utilities
+├── playwright/                          # E2E test suite
+├── files/                               # Book archives (ZIP, INPX)
+└── public/                              # Built frontend assets
 ```
 
 ## Getting Started

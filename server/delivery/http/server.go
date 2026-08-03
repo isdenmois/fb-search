@@ -1,7 +1,7 @@
-package views
+package http
 
 import (
-	"fb-search/views/controllers"
+	"fb-search/delivery/http/controllers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"

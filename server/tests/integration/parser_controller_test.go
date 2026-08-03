@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"fb-search/delivery/http/controllers"
 	"fb-search/domain"
 	"fb-search/tests/mocks"
-	"fb-search/views/controllers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"

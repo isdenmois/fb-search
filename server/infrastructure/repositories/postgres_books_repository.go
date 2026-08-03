@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"fb-search/application/ports"
 	"fb-search/domain"
-	"fb-search/shared/utils"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type BooksRepository struct {
+type PostgresBooksRepository struct {
 	pool *pgxpool.Pool
 }
 
@@ -23,8 +23,8 @@ var (
 	enRank  string = "ts_rank(to_tsvector('simple', search), websearch_to_tsquery('simple', $1))"
 )
 
-func searchQuery(q string) string {
-	if utils.ContainsCyrillic(q) {
+func searchQuery(cfg ports.SearchConfig) string {
+	if cfg.Language == "russian" {
 		return "SELECT " + fields + ", " + ruRank + " as rank FROM books WHERE " + ruWhere + " ORDER BY rank DESC LIMIT 100"
 	}
 
@@ -37,10 +37,10 @@ func scanRow(rows pgx.Row, book *domain.Book) error {
 	return rows.Scan(&book.Id, &book.Title, &book.Authors, &book.Series, &book.Serno, &book.Lang, &book.Size, &book.Rank)
 }
 
-func (self BooksRepository) SearchBooks(q string) ([]domain.Book, error) {
-	query := searchQuery(q)
+func (self *PostgresBooksRepository) SearchBooks(ctx context.Context, q string, cfg ports.SearchConfig) ([]domain.Book, error) {
+	query := searchQuery(cfg)
 
-	rows, err := self.pool.Query(context.Background(), query, q)
+	rows, err := self.pool.Query(ctx, query, q)
 	if err != nil {
 		fmt.Println("Query error: ", err.Error())
 		return nil, err
@@ -68,8 +68,8 @@ func (self BooksRepository) SearchBooks(q string) ([]domain.Book, error) {
 	return books, nil
 }
 
-func (self BooksRepository) FindFileById(id string) (domain.Book, error) {
-	row := self.pool.QueryRow(context.Background(), byIdQuery, id)
+func (self *PostgresBooksRepository) FindById(ctx context.Context, id string) (domain.Book, error) {
+	row := self.pool.QueryRow(ctx, byIdQuery, id)
 
 	var book domain.Book
 	err := scanRow(row, &book)
@@ -77,20 +77,23 @@ func (self BooksRepository) FindFileById(id string) (domain.Book, error) {
 	return book, err
 }
 
-func (self BooksRepository) RebuildDb() {
-	self.pool.Exec(context.Background(), "TRUNCATE TABLE books RESTART IDENTITY")
-	self.pool.Exec(context.Background(), "VACUUM")
+func (self *PostgresBooksRepository) RebuildDb(ctx context.Context) error {
+	if _, err := self.pool.Exec(ctx, "TRUNCATE TABLE books RESTART IDENTITY"); err != nil {
+		return err
+	}
+	_, err := self.pool.Exec(ctx, "VACUUM")
+	return err
 }
 
-func (self BooksRepository) InsertBatch(rows pgx.CopyFromSource) (uint64, error) {
+func (self *PostgresBooksRepository) InsertBatch(ctx context.Context, rows ports.RowBatchSource) (uint64, error) {
 	tableName := pgx.Identifier{"books"}
 	columns := []string{"id", "title", "search", "authors", "series", "serno", "lang", "size"}
 
-	res, err := self.pool.CopyFrom(context.Background(), tableName, columns, rows)
+	res, err := self.pool.CopyFrom(ctx, tableName, columns, rows)
 
 	return uint64(res), err
 }
 
-func NewBooksRepository(pool *pgxpool.Pool) *BooksRepository {
-	return &BooksRepository{pool: pool}
+func NewPostgresBooksRepository(pool *pgxpool.Pool) *PostgresBooksRepository {
+	return &PostgresBooksRepository{pool: pool}
 }
