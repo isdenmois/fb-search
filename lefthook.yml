@@ -19,7 +19,7 @@ pre-push:
     go-test:
       glob:
         - "*.go"
-      run: go test ./...
+      run: cd server && go test ./...
     vitest:
       run: bun run test
     playwright:
