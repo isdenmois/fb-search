@@ -6,10 +6,17 @@ import (
 	"fb-search/domain"
 )
 
+// Language is a PostgreSQL text-search configuration.
+type Language string
+
+const (
+	LanguageRussian Language = "russian"
+	LanguageSimple  Language = "simple"
+)
+
 // SearchConfig selects the PostgreSQL text-search configuration.
-// Language is either "russian" or "simple".
 type SearchConfig struct {
-	Language string
+	Language Language
 }
 
 // BookRepository is the port (interface) owned by the application layer

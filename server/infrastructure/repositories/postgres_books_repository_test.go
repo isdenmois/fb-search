@@ -10,7 +10,7 @@ import (
 
 func TestSearchQuery_Cyrillic(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "russian"}
+	cfg := ports.SearchConfig{Language: ports.LanguageRussian}
 
 	// act
 	result := searchQuery(cfg)
@@ -23,7 +23,7 @@ func TestSearchQuery_Cyrillic(t *testing.T) {
 
 func TestSearchQuery_Latin(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "simple"}
+	cfg := ports.SearchConfig{Language: ports.LanguageSimple}
 
 	// act
 	result := searchQuery(cfg)
@@ -36,7 +36,7 @@ func TestSearchQuery_Latin(t *testing.T) {
 
 func TestSearchQuery_Mixed(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "russian"}
+	cfg := ports.SearchConfig{Language: ports.LanguageRussian}
 
 	// act
 	result := searchQuery(cfg)
@@ -47,7 +47,7 @@ func TestSearchQuery_Mixed(t *testing.T) {
 
 func TestSearchQuery_Numbers(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "simple"}
+	cfg := ports.SearchConfig{Language: ports.LanguageSimple}
 
 	// act
 	result := searchQuery(cfg)
@@ -58,7 +58,7 @@ func TestSearchQuery_Numbers(t *testing.T) {
 
 func TestSearchQuery_Empty(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "simple"}
+	cfg := ports.SearchConfig{Language: ports.LanguageSimple}
 
 	// act
 	result := searchQuery(cfg)
@@ -69,7 +69,7 @@ func TestSearchQuery_Empty(t *testing.T) {
 
 func TestSearchQuery_SpecialChars(t *testing.T) {
 	// arrange
-	cfg := ports.SearchConfig{Language: "simple"}
+	cfg := ports.SearchConfig{Language: ports.LanguageSimple}
 
 	// act
 	result := searchQuery(cfg)

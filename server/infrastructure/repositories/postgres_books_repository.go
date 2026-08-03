@@ -24,7 +24,7 @@ var (
 )
 
 func searchQuery(cfg ports.SearchConfig) string {
-	if cfg.Language == "russian" {
+	if cfg.Language == ports.LanguageRussian {
 		return "SELECT " + fields + ", " + ruRank + " as rank FROM books WHERE " + ruWhere + " ORDER BY rank DESC LIMIT 100"
 	}
 

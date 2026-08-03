@@ -48,7 +48,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_CyrillicQuery() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks(s.ctx, "война и мир", ports.SearchConfig{Language: "russian"})
+	books, err := s.repo.SearchBooks(s.ctx, "война и мир", ports.SearchConfig{Language: ports.LanguageRussian})
 
 	// assert
 	s.NoError(err)
@@ -63,7 +63,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_LatinQuery() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks(s.ctx, "great gatsby", ports.SearchConfig{Language: "simple"})
+	books, err := s.repo.SearchBooks(s.ctx, "great gatsby", ports.SearchConfig{Language: ports.LanguageSimple})
 
 	// assert
 	s.NoError(err)
@@ -77,7 +77,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_MixedContent() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks(s.ctx, "potter", ports.SearchConfig{Language: "simple"})
+	books, err := s.repo.SearchBooks(s.ctx, "potter", ports.SearchConfig{Language: ports.LanguageSimple})
 
 	// assert
 	s.NoError(err)
@@ -90,7 +90,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_NoResults() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks(s.ctx, "nonexistentxyz", ports.SearchConfig{Language: "simple"})
+	books, err := s.repo.SearchBooks(s.ctx, "nonexistentxyz", ports.SearchConfig{Language: ports.LanguageSimple})
 
 	// assert
 	s.NoError(err)
@@ -124,7 +124,7 @@ func (s *BooksRepositorySuite) TestSearchBooks_Limit100() {
 	s.NoError(err)
 
 	// act
-	books, err := s.repo.SearchBooks(s.ctx, "test", ports.SearchConfig{Language: "simple"})
+	books, err := s.repo.SearchBooks(s.ctx, "test", ports.SearchConfig{Language: ports.LanguageSimple})
 
 	// assert
 	s.NoError(err)
@@ -163,7 +163,7 @@ func (s *BooksRepositorySuite) TestRebuildDb() {
 	s.NoError(err)
 
 	// verify books exist
-	books, err := s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: "russian"})
+	books, err := s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: ports.LanguageRussian})
 	s.NoError(err)
 	s.NotEmpty(books)
 
@@ -172,7 +172,7 @@ func (s *BooksRepositorySuite) TestRebuildDb() {
 	s.NoError(err)
 
 	// assert - table should be empty
-	books, err = s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: "russian"})
+	books, err = s.repo.SearchBooks(s.ctx, "война", ports.SearchConfig{Language: ports.LanguageRussian})
 	s.NoError(err)
 	s.Empty(books)
 }

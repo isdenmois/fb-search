@@ -6,6 +6,7 @@ import (
 
 	"fb-search/application/ports"
 	"fb-search/domain"
+	"fb-search/shared/utils"
 )
 
 // SearchBooksCase is the use case that resolves a user search query to a
@@ -20,9 +21,9 @@ func NewSearchBooksCase(booksRepository ports.BookRepository) *SearchBooksCase {
 }
 
 func (self *SearchBooksCase) Execute(ctx context.Context, q string) ([]domain.Book, error) {
-	cfg := ports.SearchConfig{Language: "simple"}
-	if ContainsCyrillic(q) {
-		cfg.Language = "russian"
+	cfg := ports.SearchConfig{Language: ports.LanguageSimple}
+	if utils.ContainsCyrillic(q) {
+		cfg.Language = ports.LanguageRussian
 	}
 
 	return self.booksRepository.SearchBooks(ctx, strings.ToLower(q), cfg)
