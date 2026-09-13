@@ -15,6 +15,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const testAPIKey = "test-admin-key"
+
 type ParserControllerSuite struct {
 	suite.Suite
 	mockParser *mocks.MockInpParser
@@ -28,7 +30,7 @@ func (s *ParserControllerSuite) SetupSuite() {
 	s.ctx = context.Background()
 
 	s.mockParser = mocks.NewMockInpParser()
-	s.controller = controllers.NewParserController(s.mockParser)
+	s.controller = controllers.NewParserController(s.mockParser, testAPIKey)
 
 	s.router = gin.New()
 	s.controller.Bind(s.router)
@@ -61,6 +63,7 @@ func (s *ParserControllerSuite) TestParse_RebuildEndpoint() {
 	// arrange
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/parse/rebuild", nil)
+	req.Header.Set("X-API-Key", testAPIKey)
 
 	// act
 	s.router.ServeHTTP(w, req)
@@ -75,6 +78,51 @@ func (s *ParserControllerSuite) TestParse_RebuildEndpoint() {
 	s.Equal(uint64(3), response.Files)
 	s.Equal(uint64(100), response.Books)
 	s.Equal(uint(5000), response.Time)
+}
+
+func (s *ParserControllerSuite) TestParse_RebuildWithoutKey() {
+	// arrange
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/parse/rebuild", nil)
+
+	// act
+	s.router.ServeHTTP(w, req)
+
+	// assert
+	s.Equal(http.StatusUnauthorized, w.Code)
+	s.False(s.mockParser.WasRebuildCalled())
+}
+
+func (s *ParserControllerSuite) TestParse_RebuildWithWrongKey() {
+	// arrange
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/parse/rebuild", nil)
+	req.Header.Set("X-API-Key", "wrong-key")
+
+	// act
+	s.router.ServeHTTP(w, req)
+
+	// assert
+	s.Equal(http.StatusUnauthorized, w.Code)
+	s.False(s.mockParser.WasRebuildCalled())
+}
+
+func (s *ParserControllerSuite) TestParse_EmptyServerKeyDeniesAll() {
+	// arrange
+	controller := controllers.NewParserController(s.mockParser, "")
+	router := gin.New()
+	controller.Bind(router)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/parse/rebuild", nil)
+	req.Header.Set("X-API-Key", "some-key")
+
+	// act
+	router.ServeHTTP(w, req)
+
+	// assert
+	s.Equal(http.StatusUnauthorized, w.Code)
+	s.False(s.mockParser.WasRebuildCalled())
 }
 
 func TestParserControllerSuite(t *testing.T) {

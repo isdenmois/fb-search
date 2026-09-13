@@ -1,6 +1,9 @@
 package http
 
 import (
+	"log"
+	"os"
+
 	"fb-search/application/usecases"
 	"fb-search/delivery/http/controllers"
 	"fb-search/infrastructure/db"
@@ -84,7 +87,11 @@ var ControllersDef = &di.Def{
 		downloadBookCase := ctn.Get(DownloadBookCaseDef).(*usecases.DownloadBookCase)
 
 		ping := &controllers.PingController{}
-		parser := controllers.NewParserController(inpParser)
+		apiKey := os.Getenv("ADMIN_API_KEY")
+		if apiKey == "" {
+			log.Println("ADMIN_API_KEY is not set; POST /api/parse/rebuild is disabled (requests will get 401)")
+		}
+		parser := controllers.NewParserController(inpParser, apiKey)
 		books := controllers.NewBookController(searchBooksCase, downloadBookCase)
 
 		return &[]controllers.Controller{ping, parser, books}, nil

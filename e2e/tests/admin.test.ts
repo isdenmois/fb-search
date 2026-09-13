@@ -64,4 +64,28 @@ test.describe('Admin Page', () => {
     const button = page.locator('button')
     await expect(button).toBeEnabled()
   })
+
+  test('should send api key header and stay enabled on unauthorized rebuild', async ({ page }) => {
+    // arrange
+    const adminPage = new AdminPage(page)
+
+    await parserFixture.mockParse(page, { error: 'Unauthorized' }, 401)
+
+    await adminPage.goto()
+    await adminPage.fillApiKey('wrong-key')
+
+    const rebuildRequest = page.waitForRequest(
+      (req) => req.url().includes('/api/parse/rebuild') && req.method() === 'POST',
+    )
+
+    // act
+    await adminPage.clickRebuild()
+    const request = await rebuildRequest
+
+    // assert
+    expect(request.headers()['x-api-key']).toBe('wrong-key')
+
+    const button = page.locator('button')
+    await expect(button).toBeEnabled()
+  })
 })

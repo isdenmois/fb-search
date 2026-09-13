@@ -1,37 +1,74 @@
+import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/vue'
-import { describe, expect, it, vi } from 'vitest'
-import Admin from './AdminPage.vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/shared/api', () => ({
   api: {
     parse: {
-      getProgress: vi.fn(),
-      rebuild: vi.fn(),
+      getProgress: vi.fn().mockResolvedValue(null),
+      rebuild: vi.fn().mockResolvedValue(null),
     },
   },
 }))
 
+// Fresh module graph per test so the api-key singleton re-reads sessionStorage.
+const importAdmin = () => import('./AdminPage.vue').then((m) => m.default)
+
 describe('Admin', () => {
-  it('renders with red button', () => {
-    // arrange
-    render(Admin)
-
-    // act
-    const button = screen.getByRole('button') as HTMLButtonElement
-
-    // assert
-    expect(button).toHaveClass('bg-red-500')
+  beforeEach(() => {
+    vi.resetModules()
+    sessionStorage.clear()
   })
 
-  it('shows Rebuild Database text initially', () => {
+  it('renders masked api key input and rebuild button', async () => {
     // arrange
-    render(Admin)
+    const Admin = await importAdmin()
 
     // act
-    const buttons = screen.queryAllByRole('button')
-    const button = buttons[0] as HTMLButtonElement
+    render(Admin)
 
     // assert
-    expect(button).toHaveTextContent('Rebuild Database')
+    const input = screen.getByPlaceholderText('API key')
+    expect(input).toHaveAttribute('type', 'password')
+    expect(screen.getByRole('button')).toHaveTextContent('Rebuild Database')
+  })
+
+  it('stores the entered key in sessionStorage', async () => {
+    // arrange
+    const Admin = await importAdmin()
+    render(Admin)
+    const input = screen.getByPlaceholderText('API key')
+
+    // act
+    await userEvent.type(input, 'secret-key')
+
+    // assert
+    expect(sessionStorage.getItem('admin-api-key')).toBe('secret-key')
+  })
+
+  it('restores the key from sessionStorage', async () => {
+    // arrange
+    sessionStorage.setItem('admin-api-key', 'stored-key')
+
+    // act
+    const Admin = await importAdmin()
+    render(Admin)
+
+    // assert
+    expect(screen.getByPlaceholderText('API key')).toHaveValue('stored-key')
+  })
+
+  it('passes the entered key when rebuilding', async () => {
+    // arrange
+    const Admin = await importAdmin()
+    const { api } = await import('@/shared/api')
+    render(Admin)
+    await userEvent.type(screen.getByPlaceholderText('API key'), 'secret-key')
+
+    // act
+    await userEvent.click(screen.getByRole('button'))
+
+    // assert
+    expect(api.parse.rebuild).toHaveBeenCalledWith('secret-key')
   })
 })

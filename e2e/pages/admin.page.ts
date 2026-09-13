@@ -8,6 +8,7 @@ export interface ParseProgress {
 
 export class AdminPage {
   readonly rebuildButton: Locator
+  readonly apiKeyInput: Locator
   readonly progressSection: Locator
   readonly filesInfo: Locator
   readonly booksInfo: Locator
@@ -15,6 +16,7 @@ export class AdminPage {
 
   constructor(private readonly page: Page) {
     this.rebuildButton = page.getByText('Rebuild Database')
+    this.apiKeyInput = page.getByPlaceholder('API key')
     this.progressSection = page.locator('div:has-text("Files:")')
     this.filesInfo = page.locator('p:has-text("Files:")')
     this.booksInfo = page.locator('p:has-text("Books:")')
@@ -23,6 +25,10 @@ export class AdminPage {
 
   async goto(): Promise<void> {
     await this.page.goto('/admin')
+  }
+
+  async fillApiKey(key: string): Promise<void> {
+    await this.apiKeyInput.fill(key)
   }
 
   async clickRebuild(): Promise<void> {

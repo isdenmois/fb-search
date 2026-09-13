@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { CloseIcon } from './icons'
 
-defineProps<{
-  modelValue: string
-  disabled?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    modelValue: string
+    disabled?: boolean
+    type?: string
+    placeholder?: string
+  }>(),
+  { type: 'text' },
+)
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -20,6 +25,8 @@ const clear = () => {
     <input
       class="flex-1 py-2 rounded-md"
       :disabled="disabled"
+      :type="type"
+      :placeholder="placeholder"
       :value="modelValue"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
