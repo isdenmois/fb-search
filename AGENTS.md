@@ -10,7 +10,7 @@
 
 The project is a **monorepo** with two distinct stacks:
 
-1. **Backend (Go)**: REST API server using Gin framework
+1. **Backend (Go)**: REST API server using chi router
    - Entry point: `server/main.go`
    - Dependency injection via `sarulabs/di`
    - PostgreSQL database via `pgx/v5`
@@ -170,7 +170,7 @@ curl -X POST http://localhost:8080/api/parse
 ```go
 err := someOperation()
 if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
     return
 }
 ```
@@ -178,16 +178,16 @@ if err != nil {
 **HTTP Responses:**
 
 ```go
-c.JSON(http.StatusOK, books)           // Success
-c.JSON(http.StatusBadRequest, ...)    // Client error
-c.JSON(http.StatusInternalServerError, ...)  // Server error
+writeJSON(w, http.StatusOK, books)           // Success
+writeJSON(w, http.StatusBadRequest, ...)    // Client error
+writeJSON(w, http.StatusInternalServerError, ...)  // Server error
 ```
 
 **Controller Pattern:**
 
 ```go
 type Controller interface {
-    Bind(*gin.Engine) error
+    Bind(chi.Router) error
 }
 
 type BookController struct {
@@ -195,9 +195,9 @@ type BookController struct {
     downloadBookCase *usecases.DownloadBookCase
 }
 
-func (c BookController) Bind(r *gin.Engine) error {
-    r.GET("/api/search", c.search)
-    r.GET("/dl/:file/:path", c.downloadFile)
+func (c BookController) Bind(r chi.Router) error {
+    r.Get("/api/search", c.search)
+    r.Get("/dl/{file}/{path}", c.downloadFile)
     return nil
 }
 ```
@@ -241,7 +241,7 @@ const api = wretch(BASE_URL).headers({ "Content-Type": "application/json" });
 
 ### Configuration
 
-- `server/go.mod` - Go dependencies (Gin, pgx, di, migrate)
+- `server/go.mod` - Go dependencies (chi, pgx, di, migrate)
 - `package.json` - TypeScript/Bun dependencies (Vue, Vite, Vitest, Playwright)
 - `tsconfig.json` - TypeScript compiler options
 - `tsconfig.web.json` - Web-specific config with path aliases
@@ -316,7 +316,7 @@ type BookControllerSuite struct {
     db         *testhelpers.TestDatabase
     repo       *repositories.PostgresBooksRepository
     controller *controllers.BookController
-    router     *gin.Engine
+    router     chi.Router
 }
 ```
 

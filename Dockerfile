@@ -1,5 +1,5 @@
-FROM oven/bun:1.3.10-alpine AS myjs
-FROM golang:1.26-alpine AS mygo
+FROM oven/bun:1.4.2-alpine AS myjs
+FROM golang:1.27-alpine AS mygo
 FROM alpine AS myrun
 
 # install node_modules
@@ -27,11 +27,11 @@ RUN --mount=type=cache,target=/gomod-cache \
 
 COPY server/ ./
 RUN --mount=type=cache,target=/gomod-cache --mount=type=cache,target=/go-cache \
-    go build -ldflags="-s -w" -o main .
+    go build -ldflags="-s -w" -o fb .
 
 FROM myrun
 WORKDIR /app
-COPY --from=go-builder /app/main .
+COPY --from=go-builder /app/fb .
 COPY --from=js-builder /app/public public
 COPY server/migrations migrations
-CMD ["./main"]
+CMD ["./fb"]
